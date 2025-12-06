@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en" class=""><head><script>window.livecodes = window.livecodes || {};</script><title>Untitled Project</title><meta name="title" content="Untitled Project"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><style id="__livecodes_styles__"></style><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
+  "imports": {}
+}</script></head><body>
+<script>window.livecodes = window.livecodes || {};</script><title>نظام خرائط متقدم</title><meta name="title" content="نظام خرائط متقدم"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><style id="__livecodes_styles__"></style><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام خرائط متقدم - تحديد وقياس</title>
+    
+    <!-- مكتبات CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --warning-color: #fbbc04;
+            --danger-color: #ea4335;
+            --dark-color: #202124;
+            --light-color: #f8f9fa;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* الحاوية الرئيسية */
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* شريط العنوان */
+        .header {
+            background: white;
+            padding: 12px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+        
+        .logo-text h1 {
+            font-size: 18px;
+            color: var(--dark-color);
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .logo-text p {
+            font-size: 12px;
+            color: #666;
+            margin: 0;
+        }
+        
+        /* اختيار الإسقاط */
+        .projection-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .projection-btn {
+            background: var(--light-color);
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            padding: 6px 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .projection-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        /* المحتوى الرئيسي */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* الخريطة */
+        #map {
+            flex: 1;
+            background: #e9ecef;
+            z-index: 1;
+        }
+        
+        /* لوحة المعلومات الجانبية */
+        .info-panel {
+            width: 400px;
+            background: white;
+            border-left: 1px solid #ddd;
+            box-shadow: -3px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .panel-header {
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-header h3 {
+            margin: 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .close-panel {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title i {
+            color: var(--primary-color);
+        }
+        
+        /* حقل الإحداثيات */
+        .coordinate-inputs {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .coord-field {
+            margin-bottom: 10px;
+        }
+        
+        .coord-field label {
+            display: block;
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .coord-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .coord-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .coord-row .coord-field {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        /* نتائج القياس */
+        .measurement-results {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .measurement-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .measurement-value {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin: 5px 0;
+        }
+        
+        .measurement-unit {
+            font-size: 12px;
+            opacity: 0.9;
+            text-align: center;
+        }
+        
+        .measurement-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .detail-item {
+            text-align: center;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+        
+        /* أزرار الأدوات */
+        .tools-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .tool-btn {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tool-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .tool-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .tool-btn i {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        /* زر موقعي */
+        .location-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .location-btn:hover {
+            background: #2e8b57;
+            transform: translateY(-2px);
+        }
+        
+        /* زر عرض/إخفاء اللوحة */
+        .toggle-panel-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        /* جدول العناصر المرسومة */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 11px;
+        }
+        
+        .data-table th {
+            background: #f8f9fa;
+            padding: 8px;
+            text-align: right;
+            border-bottom: 2px solid #ddd;
+            color: var(--dark-color);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            text-align: right;
+            vertical-align: top;
+        }
+        
+        .data-table tr:hover {
+            background: #f5f5f5;
+        }
+        
+        /* أزرار الإجراءات في الجدول */
+        .table-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-start;
+            margin-top: 5px;
+        }
+        
+        .table-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+        }
+        
+        .table-btn.view {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .table-btn.download {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .table-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* تصميم البوب أب */
+        .custom-popup .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .custom-popup .leaflet-popup-content {
+            margin: 0;
+            padding: 15px;
+            min-width: 280px;
+        }
+        
+        .popup-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            margin: -15px -15px 10px -15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .popup-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .popup-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .popup-content {
+            font-size: 12px;
+        }
+        
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .popup-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .popup-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .popup-value {
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: left;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .popup-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .popup-btn {
+            flex: 1;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .popup-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .popup-btn.secondary {
+            background: #f8f9fa;
+            color: var(--dark-color);
+        }
+        
+        /* زر تنزيل في معلومات النظام */
+        .download-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .download-system-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .download-system-btn:hover {
+            background: #2e8b57;
+            transform: translateY(-2px);
+        }
+        
+        /* أيقونة موقعي على الخريطة */
+        .my-location-icon {
+            background: #1a73e8;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            position: relative;
+            box-shadow: 0 0 0 5px rgba(26, 115, 232, 0.2);
+        }
+        
+        .my-location-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        /* استجابة للهواتف */
+        @media (max-width: 768px) {
+            .info-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100%;
+                width: 100%;
+                max-width: 100%;
+                transform: translateX(100%);
+            }
+            
+            .info-panel.show {
+                transform: translateX(0);
+            }
+            
+            .projection-selector {
+                display: none;
+            }
+            
+            .toggle-panel-btn {
+                display: none;
+            }
+            
+            .data-table {
+                font-size: 10px;
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .table-btn {
+                padding: 3px 5px;
+                font-size: 9px;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .toggle-panel-btn {
+                display: flex;
+            }
+        }
+        
+        /* تحسينات عامة للخريطة */
+        .leaflet-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .leaflet-control-attribution {
+            font-size: 10px !important;
+        }
+        
+        .leaflet-control-zoom {
+            border-radius: 6px !important;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* إشعارات */
+        .notification {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification-icon {
+            font-size: 20px;
+        }
+        
+        .notification.success .notification-icon {
+            color: var(--secondary-color);
+        }
+        
+        .notification.error .notification-icon {
+            color: var(--danger-color);
+        }
+        
+        .notification.info .notification-icon {
+            color: var(--primary-color);
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark-color);
+        }
+        
+        /* حقل البحث */
+        .search-box {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            z-index: 1000;
+            width: 300px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .search-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        /* شريط الأدوات على الخريطة */
+        .map-tools {
+            position: absolute;
+            top: 70px;
+            left: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .map-tool-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+        
+        .map-tool-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .map-tool-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+    </style>
+
+
+    <div class="app-container">
+        <!-- شريط العنوان -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>نظام القياس والمساحة الجغرافي</h1>
+                    <p>Google Satellite | قياس دقيق للمساحات والمسافات</p>
+                </div>
+            </div>
+            
+            <!-- اختيار نظام الإسقاط -->
+            <div class="projection-selector">
+                <div class="projection-btn active" data-projection="wgs84">
+                    <i class="fas fa-globe"></i>
+                    <span>WGS84 (درجات)</span>
+                </div>
+                <div class="projection-btn" data-projection="maroc">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>المغرب (متر)</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- الخريطة -->
+            <div id="map"></div>
+            
+            <!-- شريط البحث -->
+            <div class="search-box">
+                <input type="text" class="search-input" id="searchInput" placeholder="أدخل إحداثيات أو اسم مكان...">
+                <button class="search-btn" id="searchBtn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            
+            <!-- أدوات الرسم على الخريطة -->
+            <div class="map-tools">
+                <button class="map-tool-btn" title="وضع علامة" data-tool="marker">
+                    <i class="fas fa-map-marker-alt"></i>
+                </button>
+                <button class="map-tool-btn" title="رسم خط" data-tool="polyline">
+                    <i class="fas fa-draw-polygon"></i>
+                </button>
+                <button class="map-tool-btn" title="رسم مضلع" data-tool="polygon">
+                    <i class="fas fa-shapes"></i>
+                </button>
+            </div>
+            
+            <!-- زر عرض/إخفاء لوحة المعلومات -->
+            <div class="toggle-panel-btn" id="togglePanelBtn">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            
+            <!-- لوحة المعلومات -->
+            <div class="info-panel" id="infoPanel">
+                <div class="panel-header">
+                    <h3><i class="fas fa-layer-group"></i> لوحة التحكم والقياس</h3>
+                    <button class="close-panel" id="closePanelBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="panel-content">
+                    <!-- إدخال الإحداثيات -->
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-crosshairs"></i>
+                            إدخال الإحداثيات
+                        </div>
+                        <div class="coordinate-inputs">
+                            <div class="coord-row">
+                                <div class="coord-field">
+                                    <label>X (متر - Maroc Lambert)</label>
+                                    <input type="text" class="coord-input" id="coordXMaroc" placeholder="مثال: 500000">
+                                </div>
+                                <div class="coord-field">
+                                    <label>Y (متر - Maroc Lambert)</label>
+                                    <input type="text" class="coord-input" id="coordYMaroc" placeholder="مثال: 3500000">
+                                </div>
+                            </div>
+                            <div class="coord-row">
+                                <div class="coord-field">
+                                    <label>خط العرض (درجات - WGS84)</label>
+                                    <input type="text" class="coord-input" id="coordLatWGS" placeholder="مثال: 31.63">
+                                </div>
+                                <div class="coord-field">
+                                    <label>خط الطول (درجات - WGS84)</label>
+                                    <input type="text" class="coord-input" id="coordLonWGS" placeholder="مثال: -7.99">
+                                </div>
+                            </div>
+                            <button class="location-btn" id="gotoCoordsBtn">
+                                <i class="fas fa-location-arrow"></i>
+                                انتقال إلى الموقع
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- نتائج القياس -->
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-calculator"></i>
+                            نتائج القياس
+                        </div>
+                        <div class="measurement-results" id="measurementResults" style="display: none;">
+                            <div class="measurement-title" id="measurementType">قياس المساحة</div>
+                            <div class="measurement-value" id="measurementValue">0.00</div>
+                            <div class="measurement-unit" id="measurementUnit">متر مربع</div>
+                            <div class="measurement-details">
+                                <div class="detail-item">
+                                    <div class="detail-value" id="detailValue1">0.00</div>
+                                    <div class="detail-label" id="detailLabel1">هكتار</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-value" id="detailValue2">0.00</div>
+                                    <div class="detail-label" id="detailLabel2">كيلومتر</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- الأدوات -->
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-tools"></i>
+                            أدوات التحكم
+                        </div>
+                        <div class="tools-buttons">
+                            <button class="tool-btn" data-action="mylocation">
+                                <i class="fas fa-location-crosshairs"></i>
+                                <span>موقعي</span>
+                            </button>
+                            <button class="tool-btn" data-action="export">
+                                <i class="fas fa-download"></i>
+                                <span>تنزيل الكل</span>
+                            </button>
+                            <button class="tool-btn" data-action="clear">
+                                <i class="fas fa-trash-alt"></i>
+                                <span>مسح الكل</span>
+                            </button>
+                            <button class="tool-btn" data-action="table">
+                                <i class="fas fa-table"></i>
+                                <span>جدول البيانات</span>
+                            </button>
+                        </div>
+                        <button class="location-btn" id="showTableBtn" style="background: var(--warning-color); display: none;">
+                            <i class="fas fa-eye"></i>
+                            إظهار جدول البيانات
+                        </button>
+                    </div>
+                    
+                    <!-- جدول العناصر المرسومة -->
+                    <div class="section" id="tableSection" style="display: none;">
+                        <div class="section-title">
+                            <i class="fas fa-database"></i>
+                            جدول البيانات
+                            <button class="popup-btn secondary" style="margin-right: auto; padding: 4px 8px; font-size: 10px;" onclick="hideTable()">
+                                إخفاء
+                            </button>
+                        </div>
+                        <table class="data-table" id="elementsTable">
+                            <thead>
+                                <tr>
+                                    <th>الاسم</th>
+                                    <th>النوع</th>
+                                    <th>الإحداثيات</th>
+                                    <th>المساحة/الطول</th>
+                                    <th>الإجراءات</th>
+                                    <th>التاريخ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="elementsTableBody">
+                                <!-- البيانات تضاف هنا -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- معلومات النظام -->
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            معلومات النظام
+                            <button class="popup-btn primary" style="margin-right: auto; padding: 4px 8px; font-size: 10px;" onclick="exportSystemData()">
+                                <i class="fas fa-download"></i> تنزيل
+                            </button>
+                        </div>
+                        <div class="coordinate-inputs" style="padding: 10px;">
+                            <div class="coord-field">
+                                <label>العناصر المرسومة:</label>
+                                <div style="font-weight: 600; color: var(--primary-color);" id="drawnCount">0</div>
+                            </div>
+                            <div class="coord-field">
+                                <label>الحالة:</label>
+                                <div style="font-weight: 600; color: var(--secondary-color);" id="systemStatus">جاهز</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- مكتبات JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.min.js"></script>
+    <script src="https://unpkg.com/tokml@1.0.0/tokml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <script>
+    // تعريف المتغيرات العامة
+    let map;
+    let drawnItems;
+    let currentProjection = 'wgs84';
+    let drawControl;
+    let elements = [];
+    let elementCounter = 1;
+    let currentDrawingTool = null;
+    let geolocationWatchId = null;
+    let myLocationMarker = null;
+    
+    // تعريف أنظمة إسقاط المغرب
+    proj4.defs("EPSG:26191", "+proj=lcc +lat_1=33.21666666666667 +lat_2=35 +lat_0=33.21666666666667 +lon_0=-5.4 +x_0=500000 +y_0=300000 +ellps=intl +units=m +no_defs");
+    proj4.defs("EPSG:26192", "+proj=lcc +lat_1=29.66666666666667 +lat_2=31 +lat_0=29.66666666666667 +lon_0=-8.75 +x_0=600000 +y_0=300000 +ellps=intl +units=m +no_defs");
+    proj4.defs("EPSG:26194", "+proj=lcc +lat_1=26.66666666666667 +lat_2=28 +lat_0=26.66666666666667 +lon_0=-12.1 +x_0=700000 +y_0=300000 +ellps=intl +units=m +no_defs");
+    proj4.defs("EPSG:26195", "+proj=lcc +lat_1=24 +lat_2=25.5 +lat_0=24 +lon_0=-16 +x_0=800000 +y_0=300000 +ellps=intl +units=m +no_defs");
+    
+    // أسماء المدن المغربية
+    const moroccanCities = {
+        "الرباط": { lat: 33.9716, lng: -6.8498 },
+        "الدار البيضاء": { lat: 33.5731, lng: -7.5898 },
+        "مراكش": { lat: 31.6295, lng: -7.9811 },
+        "فاس": { lat: 34.0181, lng: -5.0078 },
+        "طنجة": { lat: 35.7595, lng: -5.8340 },
+        "مكناس": { lat: 33.8935, lng: -5.5473 },
+        "أكادير": { lat: 30.4278, lng: -9.5981 },
+        "وجدة": { lat: 34.6814, lng: -1.9002 },
+        "تطوان": { lat: 35.5889, lng: -5.3626 },
+        "الصويرة": { lat: 31.5085, lng: -9.7595 },
+        "أسفي": { lat: 32.2833, lng: -9.2333 },
+        "الجديدة": { lat: 33.2316, lng: -8.5007 },
+        "بن جرير": { lat: 32.2404, lng: -7.9612 },
+        "خريبكة": { lat: 32.8777, lng: -6.9062 },
+        "قنيطرة": { lat: 34.2541, lng: -6.5890 },
+        "تازة": { lat: 34.2150, lng: -4.0067 },
+        "الحسيمة": { lat: 35.2493, lng: -3.9373 },
+        "الناظور": { lat: 35.1688, lng: -2.9283 },
+        "ورزازات": { lat: 30.9202, lng: -6.9095 },
+        "السمارة": { lat: 26.7333, lng: -11.6833 },
+        "العيون": { lat: 27.1622, lng: -13.2033 },
+        "الداخلة": { lat: 23.7141, lng: -15.9368 }
+    };
+    
+    // عند تحميل الصفحة
+    $(document).ready(function() {
+        initMap();
+        setupEventListeners();
+        updateElementsTable();
+        showNotification('نظام القياس الجغرافي جاهز للاستخدام', 'success');
+    });
+    
+    // تهيئة الخريطة
+    function initMap() {
+        // إنشاء الخريطة
+        map = L.map('map', {
+            center: [31.63, -7.99], // وسط المغرب
+            zoom: 8,
+            zoomControl: true,
+            attributionControl: true,
+            preferCanvas: true
+        });
+        
+        // إضافة خريطة جوجل القمرية
+        L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            attribution: '© Google Satellite',
+            maxZoom: 20,
+            minZoom: 1,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+        
+        // إضافة أسماء المواقع (Labels)
+        L.tileLayer('https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}', {
+            attribution: '© Google Maps',
+            maxZoom: 20,
+            minZoom: 1,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+        
+        // إنشاء مجموعة العناصر المرسومة
+        drawnItems = L.featureGroup().addTo(map);
+        
+        // تحديث الإحداثيات عند تحريك المؤشر
+        map.on('mousemove', function(e) {
+            updateCoordinateInputs(e.latlng);
+        });
+        
+        // تحديث حجم الخريطة
+        setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+    }
+    
+    // إعداد مستمعي الأحداث
+    function setupEventListeners() {
+        // اختيار نظام الإسقاط
+        $('.projection-btn').click(function() {
+            $('.projection-btn').removeClass('active');
+            $(this).addClass('active');
+            currentProjection = $(this).data('projection');
+            updateSystemInfo();
+        });
+        
+        // زر عرض/إخفاء لوحة المعلومات
+        $('#togglePanelBtn').click(function() {
+            $('#infoPanel').toggleClass('show');
+            updatePanelButton();
+        });
+        
+        // زر إغلاق اللوحة
+        $('#closePanelBtn').click(function() {
+            $('#infoPanel').removeClass('show');
+            updatePanelButton();
+        });
+        
+        // زر الانتقال إلى الإحداثيات
+        $('#gotoCoordsBtn').click(goToCoordinates);
+        
+        // أزرار الأدوات
+        $('.tool-btn').click(function() {
+            const action = $(this).data('action');
+            
+            switch(action) {
+                case 'mylocation':
+                    getMyLocation();
+                    break;
+                case 'export':
+                    exportData();
+                    break;
+                case 'clear':
+                    clearAllElements();
+                    break;
+                case 'table':
+                    showTable();
+                    break;
+            }
+        });
+        
+        // زر إظهار الجدول
+        $('#showTableBtn').click(showTable);
+        
+        // أزرار أدوات الرسم على الخريطة
+        $('.map-tool-btn').click(function() {
+            const tool = $(this).data('tool');
+            enableDrawingTool(tool);
+        });
+        
+        // زر البحث
+        $('#searchBtn').click(searchLocation);
+        $('#searchInput').keypress(function(e) {
+            if (e.which === 13) {
+                searchLocation();
+            }
+        });
+        
+        // تحديث الإحداثيات عند تغيير المدخلات
+        $('#coordXMaroc, #coordYMaroc').on('input', function() {
+            updateWGSFromMaroc();
+        });
+        
+        $('#coordLatWGS, #coordLonWGS').on('input', function() {
+            updateMarocFromWGS();
+        });
+    }
+    
+    // تفعيل أداة الرسم
+    function enableDrawingTool(tool) {
+        // إزالة الأداة الحالية
+        if (drawControl) {
+            map.removeControl(drawControl);
+        }
+        
+        // تحديث حالة الأزرار
+        $('.map-tool-btn').removeClass('active');
+        $(`.map-tool-btn[data-tool="${tool}"]`).addClass('active');
+        
+        currentDrawingTool = tool;
+        
+        // إعدادات الرسم
+        const drawOptions = {
+            position: 'topright',
+            draw: {},
+            edit: {
+                featureGroup: drawnItems
+            }
+        };
+        
+        // إعدادات حسب نوع الأداة
+        switch(tool) {
+            case 'marker':
+                drawOptions.draw = {
+                    polygon: false,
+                    polyline: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<i class="fas fa-map-marker-alt" style="color: #1a73e8; font-size: 24px;"></i>',
+                            iconSize: [24, 24]
+                        })
+                    }
+                };
+                break;
+                
+            case 'polyline':
+                drawOptions.draw = {
+                    polygon: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: false,
+                    polyline: {
+                        shapeOptions: {
+                            color: '#1a73e8',
+                            weight: 3
+                        },
+                        metric: true
+                    }
+                };
+                break;
+                
+            case 'polygon':
+                drawOptions.draw = {
+                    polyline: false,
+                    rectangle: false,
+                    circle: false,
+                    marker: false,
+                    polygon: {
+                        shapeOptions: {
+                            color: '#1a73e8',
+                            fillColor: '#1a73e8',
+                            fillOpacity: 0.3
+                        },
+                        allowIntersection: false,
+                        showArea: true,
+                        metric: true
+                    }
+                };
+                break;
+        }
+        
+        // إضافة أدوات الرسم
+        drawControl = new L.Control.Draw(drawOptions);
+        map.addControl(drawControl);
+        
+        // إعداد مستمعي الأحداث للرسم
+        setupDrawingEvents();
+        
+        showNotification(`أداة ${getToolName(tool)} مفعلة`, 'info');
+    }
+    
+    // إعداد أحداث الرسم
+    function setupDrawingEvents() {
+        // إزالة المستمعين السابقين
+        map.off('draw:created');
+        map.off('draw:edited');
+        map.off('draw:deleted');
+        
+        // عند إنشاء شكل
+        map.on('draw:created', function(e) {
+            const layer = e.layer;
+            const type = e.layerType;
+            
+            // تحديد اسم النوع
+            let typeName = '';
+            let elementType = '';
+            
+            switch(type) {
+                case 'marker':
+                    typeName = 'نقطة';
+                    elementType = 'point';
+                    break;
+                case 'polyline':
+                    typeName = 'خط';
+                    elementType = 'line';
+                    break;
+                case 'polygon':
+                    typeName = 'مضلع';
+                    elementType = 'polygon';
+                    break;
+                case 'rectangle':
+                    typeName = 'مستطيل';
+                    elementType = 'polygon';
+                    break;
+            }
+            
+            // الحصول على الموقع الجغرافي لتحديد الاسم
+            const location = getLocationName(layer);
+            const defaultName = `${typeName} ${elementCounter} ${location}`;
+            
+            // طلب اسم للعنصر
+            const elementName = prompt(`أدخل اسماً للـ${typeName} (${location}):`, defaultName);
+            
+            if (elementName !== null && elementName.trim() !== '') {
+                // إضافة العنصر
+                addElement(layer, elementName.trim(), elementType, type);
+                elementCounter++;
+                
+                // إضافة النافذة المنبثقة
+                addPopupToElement(layer, elementName.trim(), elementType);
+                
+                // عرض نتائج القياس
+                showMeasurementResults(layer, elementType);
+                
+                showNotification(`تم إنشاء ${typeName}: ${elementName.trim()}`, 'success');
+            } else {
+                // إزالة الطبقة إذا تم إلغاء الاسم
+                layer.remove();
+            }
+        });
+        
+        // عند تحرير شكل
+        map.on('draw:edited', function(e) {
+            const layers = e.layers;
+            layers.eachLayer(function(layer) {
+                updateElementPopup(layer);
+                const element = elements.find(e => e.id === layer.elementId);
+                if (element) {
+                    showMeasurementResults(layer, element.type);
+                }
+            });
+            showNotification('تم تحرير العنصر', 'info');
+        });
+        
+        // عند حذف شكل
+        map.on('draw:deleted', function(e) {
+            const layers = e.layers;
+            layers.eachLayer(function(layer) {
+                removeElement(layer);
+            });
+            showNotification('تم حذف العنصر', 'info');
+        });
+    }
+    
+    // الحصول على اسم الموقع الجغرافي
+    function getLocationName(layer) {
+        let center;
+        
+        if (layer instanceof L.Marker) {
+            center = layer.getLatLng();
+        } else if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+            const bounds = layer.getBounds();
+            center = bounds.getCenter();
+        } else {
+            return '';
+        }
+        
+        // حساب المسافات إلى المدن الرئيسية
+        let closestCity = '';
+        let minDistance = Infinity;
+        
+        for (const [city, coords] of Object.entries(moroccanCities)) {
+            const distance = calculateDistance(center.lat, center.lng, coords.lat, coords.lng);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCity = city;
+            }
+        }
+        
+        // تحديد الوصف حسب المسافة
+        if (minDistance < 10) {
+            return `في ${closestCity}`;
+        } else if (minDistance < 30) {
+            return `قرب ${closestCity}`;
+        } else if (minDistance < 100) {
+            return `بجوار ${closestCity}`;
+        } else {
+            return `بالقرب من ${closestCity}`;
+        }
+    }
+    
+    // حساب المسافة بين نقطتين
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // نصف قطر الأرض بالكيلومتر
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // إضافة عنصر إلى القائمة
+    function addElement(layer, name, type, drawType) {
+        const element = {
+            id: Date.now(),
+            name: name,
+            type: type,
+            drawType: drawType,
+            layer: layer,
+            location: getLocationName(layer),
+            createdAt: new Date().toLocaleString('ar'),
+            measurements: getMeasurements(layer, type),
+            coordinates: getElementCoordinates(layer, type)
+        };
+        
+        elements.push(element);
+        drawnItems.addLayer(layer);
+        
+        // حفظ المرجع في الطبقة
+        layer.elementId = element.id;
+        
+        updateElementsTable();
+        updateDrawnCount();
+        $('#showTableBtn').show();
+    }
+    
+    // الحصول على إحداثيات العنصر
+    function getElementCoordinates(layer, type) {
+        const coordinates = {
+            wgs84: '',
+            maroc: ''
+        };
+        
+        if (type === 'point') {
+            const latlng = layer.getLatLng();
+            coordinates.wgs84 = `${latlng.lat.toFixed(6)}°, ${latlng.lng.toFixed(6)}°`;
+            
+            try {
+                const marocCoords = proj4('EPSG:4326', 'EPSG:26191', [latlng.lng, latlng.lat]);
+                coordinates.maroc = `${marocCoords[0].toFixed(2)} م, ${marocCoords[1].toFixed(2)} م`;
+            } catch (error) {
+                coordinates.maroc = 'N/A';
+            }
+            
+        } else if (type === 'line') {
+            const latlngs = layer.getLatLngs();
+            if (latlngs.length > 0) {
+                const firstPoint = latlngs[0];
+                coordinates.wgs84 = `${firstPoint.lat.toFixed(6)}°, ${firstPoint.lng.toFixed(6)}°`;
+                
+                try {
+                    const marocCoords = proj4('EPSG:4326', 'EPSG:26191', [firstPoint.lng, firstPoint.lat]);
+                    coordinates.maroc = `${marocCoords[0].toFixed(2)} م, ${marocCoords[1].toFixed(2)} م`;
+                } catch (error) {
+                    coordinates.maroc = 'N/A';
+                }
+            }
+            
+        } else if (type === 'polygon') {
+            const bounds = layer.getBounds();
+            const center = bounds.getCenter();
+            coordinates.wgs84 = `${center.lat.toFixed(6)}°, ${center.lng.toFixed(6)}°`;
+            
+            try {
+                const marocCoords = proj4('EPSG:4326', 'EPSG:26191', [center.lng, center.lat]);
+                coordinates.maroc = `${marocCoords[0].toFixed(2)} م, ${marocCoords[1].toFixed(2)} م`;
+            } catch (error) {
+                coordinates.maroc = 'N/A';
+            }
+        }
+        
+        return coordinates;
+    }
+    
+    // الحصول على قياسات العنصر
+    function getMeasurements(layer, type) {
+        const measurements = {};
+        
+        if (type === 'point') {
+            measurements.coordinates = getCoordinatesInBothSystems(layer.getLatLng());
+        } else if (type === 'line') {
+            measurements.length = calculateLength(layer);
+            measurements.lengthKm = (measurements.length / 1000).toFixed(3);
+        } else if (type === 'polygon') {
+            measurements.area = calculateArea(layer);
+            measurements.areaHectares = (measurements.area / 10000).toFixed(3);
+            measurements.perimeter = calculatePerimeter(layer);
+            measurements.perimeterKm = (measurements.perimeter / 1000).toFixed(3);
+        }
+        
+        return measurements;
+    }
+    
+    // تحديث نافذة العنصر المنبثقة
+    function addPopupToElement(layer, name, type) {
+        let content = '';
+        const element = elements.find(e => e.id === layer.elementId);
+        
+        if (element) {
+            if (type === 'point') {
+                const coords = element.measurements.coordinates;
+                
+                content = `
+                    <div class="popup-header">
+                        <span class="popup-title">${name}</span>
+                        <button class="popup-close" onclick="this.closest('.leaflet-popup').close()">×</button>
+                    </div>
+                    <div class="popup-content">
+                        <div class="popup-row">
+                            <span class="popup-label">النوع:</span>
+                            <span class="popup-value">نقطة</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">الموقع:</span>
+                            <span class="popup-value">${element.location}</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">WGS84:</span>
+                            <span class="popup-value">${coords.wgs84}</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">المغرب (متر):</span>
+                            <span class="popup-value">${coords.maroc}</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">التاريخ:</span>
+                            <span class="popup-value">${element.createdAt}</span>
+                        </div>
+                        <div class="popup-actions">
+                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">تعديل الاسم</button>
+                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">تنزيل</button>
+                        </div>
+                    </div>
+                `;
+                
+            } else if (type === 'line') {
+                const length = element.measurements.length;
+                const lengthKm = element.measurements.lengthKm;
+                
+                content = `
+                    <div class="popup-header">
+                        <span class="popup-title">${name}</span>
+                        <button class="popup-close" onclick="this.closest('.leaflet-popup').close()">×</button>
+                    </div>
+                    <div class="popup-content">
+                        <div class="popup-row">
+                            <span class="popup-label">النوع:</span>
+                            <span class="popup-value">خط</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">الموقع:</span>
+                            <span class="popup-value">${element.location}</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">الطول:</span>
+                            <span class="popup-value">${length.toFixed(2)} م</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">الطول:</span>
+                            <span class="popup-value">${lengthKm} كم</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">التاريخ:</span>
+                            <span class="popup-value">${element.createdAt}</span>
+                        </div>
+                        <div class="popup-actions">
+                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">تعديل الاسم</button>
+                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">تنزيل</button>
+                        </div>
+                    </div>
+                `;
+                
+            } else if (type === 'polygon') {
+                const area = element.measurements.area;
+                const areaHectares = element.measurements.areaHectares;
+                const perimeter = element.measurements.perimeter;
+                const perimeterKm = element.measurements.perimeterKm;
+                
+                content = `
+                    <div class="popup-header">
+                        <span class="popup-title">${name}</span>
+                        <button class="popup-close" onclick="this.closest('.leaflet-popup').close()">×</button>
+                    </div>
+                    <div class="popup-content">
+                        <div class="popup-row">
+                            <span class="popup-label">النوع:</span>
+                            <span class="popup-value">مضلع</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">الموقع:</span>
+                            <span class="popup-value">${element.location}</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">المساحة:</span>
+                            <span class="popup-value">${area.toFixed(2)} م²</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">المساحة:</span>
+                            <span class="popup-value">${areaHectares} هكتار</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">المحيط:</span>
+                            <span class="popup-value">${perimeter.toFixed(2)} م</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">المحيط:</span>
+                            <span class="popup-value">${perimeterKm} كم</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">التاريخ:</span>
+                            <span class="popup-value">${element.createdAt}</span>
+                        </div>
+                        <div class="popup-actions">
+                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">تعديل الاسم</button>
+                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">تنزيل</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        layer.bindPopup(content, {
+            className: 'custom-popup',
+            maxWidth: 300
+        }).openPopup();
+    }
+    
+    // تحديث نافذة العنصر المنبثقة
+    function updateElementPopup(layer) {
+        const element = elements.find(e => e.id === layer.elementId);
+        if (element) {
+            addPopupToElement(layer, element.name, element.type);
+        }
+    }
+    
+    // إزالة عنصر من القائمة
+    function removeElement(layer) {
+        const index = elements.findIndex(e => e.id === layer.elementId);
+        if (index !== -1) {
+            elements.splice(index, 1);
+            updateElementsTable();
+            updateDrawnCount();
+            
+            if (elements.length === 0) {
+                $('#showTableBtn').hide();
+                $('#tableSection').hide();
+            }
+        }
+    }
+    
+    // تحديث جدول العناصر
+    function updateElementsTable() {
+        const tbody = $('#elementsTableBody');
+        tbody.empty();
+        
+        elements.forEach(element => {
+            let measurementText = '';
+            let coordinateText = '';
+            
+            if (element.type === 'point') {
+                measurementText = 'نقطة';
+                coordinateText = `
+                    <div style="font-size: 9px; color: #666;">
+                        <strong>WGS84:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>المغرب:</strong> ${element.coordinates.maroc}
+                    </div>
+                `;
+            } else if (element.type === 'line') {
+                measurementText = `${element.measurements.length.toFixed(2)} م<br>(${element.measurements.lengthKm} كم)`;
+                coordinateText = `
+                    <div style="font-size: 9px; color: #666;">
+                        <strong>بداية:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>المغرب:</strong> ${element.coordinates.maroc}
+                    </div>
+                `;
+            } else if (element.type === 'polygon') {
+                measurementText = `${element.measurements.area.toFixed(2)} م²<br>(${element.measurements.areaHectares} هكتار)`;
+                coordinateText = `
+                    <div style="font-size: 9px; color: #666;">
+                        <strong>المركز:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>المغرب:</strong> ${element.coordinates.maroc}
+                    </div>
+                `;
+            }
+            
+            const row = `
+                <tr>
+                    <td>${element.name}</td>
+                    <td>${getTypeName(element.type)}<br><small style="color: #666;">${element.location}</small></td>
+                    <td>${coordinateText}</td>
+                    <td>${measurementText}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="table-btn view" onclick="viewOnMap(${element.id})" title="عرض على الخريطة">
+                                <i class="fas fa-map-marker-alt"></i> عرض
+                            </button>
+                            <button class="table-btn download" onclick="downloadElement(${element.id})" title="تنزيل العنصر">
+                                <i class="fas fa-download"></i> تحميل
+                            </button>
+                        </div>
+                    </td>
+                    <td>${element.createdAt}</td>
+                </tr>
+            `;
+            
+            tbody.append(row);
+        });
+    }
+    
+    // تحديث عدد العناصر المرسومة
+    function updateDrawnCount() {
+        $('#drawnCount').text(elements.length);
+    }
+    
+    // تحديث حقول الإحداثيات
+    function updateCoordinateInputs(latlng) {
+        const lat = latlng.lat;
+        const lng = latlng.lng;
+        
+        // تحديث WGS84
+        $('#coordLatWGS').val(lat.toFixed(6));
+        $('#coordLonWGS').val(lng.toFixed(6));
+        
+        // تحديث Maroc Lambert
+        updateMarocFromWGS();
+    }
+    
+    // تحديث Maroc من WGS84
+    function updateMarocFromWGS() {
+        const lat = parseFloat($('#coordLatWGS').val());
+        const lng = parseFloat($('#coordLonWGS').val());
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+            try {
+                const coords = proj4('EPSG:4326', 'EPSG:26191', [lng, lat]);
+                $('#coordXMaroc').val(coords[0].toFixed(2));
+                $('#coordYMaroc').val(coords[1].toFixed(2));
+            } catch (error) {
+                console.error('خطأ في التحويل:', error);
+            }
+        }
+    }
+    
+    // تحديث WGS84 من Maroc
+    function updateWGSFromMaroc() {
+        const x = parseFloat($('#coordXMaroc').val());
+        const y = parseFloat($('#coordYMaroc').val());
+        
+        if (!isNaN(x) && !isNaN(y)) {
+            try {
+                const coords = proj4('EPSG:26191', 'EPSG:4326', [x, y]);
+                $('#coordLatWGS').val(coords[1].toFixed(6));
+                $('#coordLonWGS').val(coords[0].toFixed(6));
+            } catch (error) {
+                console.error('خطأ في التحويل:', error);
+            }
+        }
+    }
+    
+    // الانتقال إلى الإحداثيات
+    function goToCoordinates() {
+        const lat = parseFloat($('#coordLatWGS').val());
+        const lng = parseFloat($('#coordLonWGS').val());
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+            map.setView([lat, lng], 15);
+            showNotification(`تم الانتقال إلى: ${lat.toFixed(6)}°, ${lng.toFixed(6)}°`, 'success');
+        } else {
+            showNotification('الرجاء إدخال إحداثيات صحيحة', 'error');
+        }
+    }
+    
+    // البحث عن موقع
+    function searchLocation() {
+        const input = $('#searchInput').val().trim();
+        
+        if (!input) {
+            showNotification('الرجاء إدخال إحداثيات أو اسم مكان', 'error');
+            return;
+        }
+        
+        // محاولة تحليل الإحداثيات
+        const coords = input.split(/[\s,;]+/);
+        if (coords.length >= 2) {
+            const lat = parseFloat(coords[0]);
+            const lng = parseFloat(coords[1]);
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+                map.setView([lat, lng], 15);
+                showNotification(`تم الانتقال إلى الإحداثيات: ${lat}, ${lng}`, 'success');
+                return;
+            }
+        }
+        
+        // البحث عن المدينة
+        const city = Object.keys(moroccanCities).find(c => 
+            c.includes(input) || input.includes(c)
+        );
+        
+        if (city) {
+            const location = moroccanCities[city];
+            map.setView([location.lat, location.lng], 12);
+            showNotification(`تم الانتقال إلى: ${city}`, 'success');
+        } else {
+            showNotification('لم يتم العثور على المكان المطلوب', 'error');
+        }
+        
+        $('#searchInput').val('');
+    }
+    
+    // الحصول على موقعي
+    function getMyLocation() {
+        if (!navigator.geolocation) {
+            showNotification('المتصفح لا يدعم تحديد الموقع', 'error');
+            return;
+        }
+        
+        $('#systemStatus').text('جاري تحديد الموقع...');
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                map.setView([lat, lng], 16);
+                
+                // تحديث حقول الإحداثيات
+                $('#coordLatWGS').val(lat.toFixed(6));
+                $('#coordLonWGS').val(lng.toFixed(6));
+                updateMarocFromWGS();
+                
+                // إزالة العلامة السابقة إذا كانت موجودة
+                if (myLocationMarker) {
+                    map.removeLayer(myLocationMarker);
+                }
+                
+                // إنشاء أيقونة موقعي كما في جوجل
+                const myLocationIcon = L.divIcon({
+                    className: 'my-location-icon',
+                    html: '',
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
+                });
+                
+                // إضافة علامة موقعي
+                myLocationMarker = L.marker([lat, lng], {
+                    icon: myLocationIcon,
+                    zIndexOffset: 1000
+                }).addTo(map);
+                
+                myLocationMarker.bindPopup(`
+                    <div class="popup-header">
+                        <span class="popup-title">موقعي الحالي</span>
+                    </div>
+                    <div class="popup-content">
+                        <div class="popup-row">
+                            <span class="popup-label">خط العرض:</span>
+                            <span class="popup-value">${lat.toFixed(6)}°</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">خط الطول:</span>
+                            <span class="popup-value">${lng.toFixed(6)}°</span>
+                        </div>
+                        <div class="popup-row">
+                            <span class="popup-label">الدقة:</span>
+                            <span class="popup-value">±${position.coords.accuracy.toFixed(1)} م</span>
+                        </div>
+                    </div>
+                `).openPopup();
+                
+                $('#systemStatus').text('تم تحديد الموقع');
+                showNotification('تم تحديد موقعك الحالي', 'success');
+                
+                // تتبع الموقع
+                if (geolocationWatchId) {
+                    navigator.geolocation.clearWatch(geolocationWatchId);
+                }
+                
+                geolocationWatchId = navigator.geolocation.watchPosition(
+                    function(position) {
+                        const newLat = position.coords.latitude;
+                        const newLng = position.coords.longitude;
+                        if (myLocationMarker) {
+                            myLocationMarker.setLatLng([newLat, newLng]);
+                        }
+                    },
+                    function(error) {
+                        console.error('خطأ في تتبع الموقع:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 10000,
+                        timeout: 5000
+                    }
+                );
+            },
+            function(error) {
+                let message = 'حدث خطأ في تحديد الموقع';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        message = 'تم رفض الإذن لتحديد الموقع';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        message = 'معلومات الموقع غير متوفرة';
+                        break;
+                    case error.TIMEOUT:
+                        message = 'انتهت مهلة طلب الموقع';
+                        break;
+                }
+                
+                $('#systemStatus').text('خطأ في الموقع');
+                showNotification(message, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+    
+    // عرض نتائج القياس
+    function showMeasurementResults(layer, type) {
+        if (type === 'line') {
+            const length = calculateLength(layer);
+            const lengthKm = (length / 1000).toFixed(3);
+            
+            $('#measurementResults').show();
+            $('#measurementType').text('قياس طول الخط');
+            $('#measurementValue').text(`${length.toFixed(2)}`);
+            $('#measurementUnit').text('متر');
+            $('#detailValue1').text(lengthKm);
+            $('#detailLabel1').text('كيلومتر');
+            $('#detailValue2').text('');
+            $('#detailLabel2').text('');
+            
+        } else if (type === 'polygon') {
+            const area = calculateArea(layer);
+            const areaHectares = (area / 10000).toFixed(3);
+            const perimeter = calculatePerimeter(layer);
+            const perimeterKm = (perimeter / 1000).toFixed(3);
+            
+            $('#measurementResults').show();
+            $('#measurementType').text('قياس مساحة المضلع');
+            $('#measurementValue').text(`${area.toFixed(2)}`);
+            $('#measurementUnit').text('متر مربع');
+            $('#detailValue1').text(areaHectares);
+            $('#detailLabel1').text('هكتار');
+            $('#detailValue2').text(perimeterKm);
+            $('#detailLabel2').text('كيلومتر (محيط)');
+        }
+    }
+    
+    // مسح جميع العناصر
+    function clearAllElements() {
+        if (elements.length > 0) {
+            if (confirm(`هل تريد مسح جميع العناصر (${elements.length} عنصر)?`)) {
+                drawnItems.clearLayers();
+                elements = [];
+                elementCounter = 1;
+                updateElementsTable();
+                updateDrawnCount();
+                $('#showTableBtn').hide();
+                $('#tableSection').hide();
+                $('#measurementResults').hide();
+                showNotification('تم مسح جميع العناصر', 'info');
+            }
+        } else {
+            showNotification('لا توجد عناصر للمسح', 'info');
+        }
+    }
+    
+    // عرض جدول البيانات
+    function showTable() {
+        $('#tableSection').show();
+        updateElementsTable();
+    }
+    
+    // إخفاء جدول البيانات
+    function hideTable() {
+        $('#tableSection').hide();
+    }
+    
+    // تصدير البيانات
+    function exportData() {
+        if (elements.length === 0) {
+            showNotification('لا توجد عناصر للتصدير', 'error');
+            return;
+        }
+        
+        const format = prompt('اختر صيغة التصدير:\n1. KML (لـ Google Earth)\n2. GeoJSON\n3. CSV (جدول بيانات)', '1');
+        
+        switch(format) {
+            case '1':
+                exportToKML();
+                break;
+            case '2':
+                exportToGeoJSON();
+                break;
+            case '3':
+                exportToCSV();
+                break;
+            default:
+                showNotification('لم يتم اختيار صيغة صالحة', 'error');
+        }
+    }
+    
+    // تصدير إلى KML
+    function exportToKML() {
+        const geojson = drawnItems.toGeoJSON();
+        
+        // إضافة خصائص العناصر
+        geojson.features.forEach((feature, index) => {
+            const element = elements[index];
+            if (element) {
+                feature.properties = feature.properties || {};
+                feature.properties.name = element.name;
+                feature.properties.type = element.type;
+                feature.properties.location = element.location;
+                feature.properties.createdAt = element.createdAt;
+                
+                if (element.type === 'line') {
+                    feature.properties.length = `${element.measurements.length.toFixed(2)} م`;
+                    feature.properties.lengthKm = element.measurements.lengthKm + ' كم';
+                } else if (element.type === 'polygon') {
+                    feature.properties.area = `${element.measurements.area.toFixed(2)} م²`;
+                    feature.properties.areaHectares = element.measurements.areaHectares + ' هكتار';
+                    feature.properties.perimeter = `${element.measurements.perimeter.toFixed(2)} م`;
+                    feature.properties.perimeterKm = element.measurements.perimeterKm + ' كم';
+                }
+            }
+        });
+        
+        const kml = toKML(geojson);
+        
+        const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+        saveAs(blob, `خرائط_تصدير_${Date.now()}.kml`);
+        
+        showNotification(`تم تصدير ${elements.length} عنصر بصيغة KML`, 'success');
+    }
+    
+    // تصدير إلى GeoJSON
+    function exportToGeoJSON() {
+        const geojson = drawnItems.toGeoJSON();
+        
+        // إضافة خصائص العناصر
+        geojson.features.forEach((feature, index) => {
+            const element = elements[index];
+            if (element) {
+                feature.properties = feature.properties || {};
+                feature.properties.name = element.name;
+                feature.properties.type = element.type;
+                feature.properties.location = element.location;
+                feature.properties.createdAt = element.createdAt;
+                
+                if (element.type === 'line') {
+                    feature.properties.length = element.measurements.length;
+                    feature.properties.lengthKm = element.measurements.lengthKm;
+                } else if (element.type === 'polygon') {
+                    feature.properties.area = element.measurements.area;
+                    feature.properties.areaHectares = element.measurements.areaHectares;
+                    feature.properties.perimeter = element.measurements.perimeter;
+                    feature.properties.perimeterKm = element.measurements.perimeterKm;
+                }
+            }
+        });
+        
+        const data = JSON.stringify(geojson, null, 2);
+        
+        const blob = new Blob([data], { type: 'application/json' });
+        saveAs(blob, `خرائط_تصدير_${Date.now()}.geojson`);
+        
+        showNotification(`تم تصدير ${elements.length} عنصر بصيغة GeoJSON`, 'success');
+    }
+    
+    // تصدير إلى CSV
+    function exportToCSV() {
+        let csv = 'الاسم,النوع,الموقع,WGS84,المغرب (متر),المساحة/الطول,التاريخ\n';
+        
+        elements.forEach(element => {
+            let measurement = '';
+            
+            if (element.type === 'point') {
+                measurement = 'نقطة';
+            } else if (element.type === 'line') {
+                measurement = `${element.measurements.length.toFixed(2)} م (${element.measurements.lengthKm} كم)`;
+            } else if (element.type === 'polygon') {
+                measurement = `${element.measurements.area.toFixed(2)} م² (${element.measurements.areaHectares} هكتار)`;
+            }
+            
+            csv += `"${element.name}","${getTypeName(element.type)}","${element.location}","${element.coordinates.wgs84}","${element.coordinates.maroc}","${measurement}","${element.createdAt}"\n`;
+        });
+        
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+        saveAs(blob, `خرائط_تصدير_${Date.now()}.csv`);
+        
+        showNotification(`تم تصدير ${elements.length} عنصر بصيغة CSV`, 'success');
+    }
+    
+    // تصدير معلومات النظام
+    function exportSystemData() {
+        const systemInfo = {
+            تطبيق: "نظام القياس والمساحة الجغرافي",
+            تاريخ_التصدير: new Date().toLocaleString('ar'),
+            عدد_العناصر: elements.length,
+            حالة_النظام: $('#systemStatus').text(),
+            نظام_الإسقاط: currentProjection,
+            العناصر: elements.map(element => ({
+                الاسم: element.name,
+                النوع: getTypeName(element.type),
+                الموقع: element.location,
+                الإحداثيات_WGS84: element.coordinates.wgs84,
+                الإحداثيات_المغرب: element.coordinates.maroc,
+                المساحة_أو_الطول: element.type === 'point' ? 'نقطة' : 
+                                  element.type === 'line' ? `${element.measurements.length.toFixed(2)} م` : 
+                                  `${element.measurements.area.toFixed(2)} م²`,
+                التاريخ: element.createdAt
+            }))
+        };
+        
+        const data = JSON.stringify(systemInfo, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        saveAs(blob, `معلومات_النظام_${Date.now()}.json`);
+        
+        showNotification('تم تصدير معلومات النظام', 'success');
+    }
+    
+    // تحويل GeoJSON إلى KML
+    function toKML(geojson) {
+        let kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+<name>تصدير من نظام القياس الجغرافي</name>
+<description>تم التصدير في ${new Date().toLocaleString('ar')}</description>
+<open>1</open>`;
+        
+        geojson.features.forEach((feature, index) => {
+            const props = feature.properties || {};
+            const name = props.name || `عنصر ${index + 1}`;
+            const description = `
+                النوع: ${props.type || feature.geometry.type}
+                الموقع: ${props.location || 'غير محدد'}
+                ${props.length ? `الطول: ${props.length}\n` : ''}
+                ${props.lengthKm ? `الطول: ${props.lengthKm}\n` : ''}
+                ${props.area ? `المساحة: ${props.area}\n` : ''}
+                ${props.areaHectares ? `المساحة: ${props.areaHectares}\n` : ''}
+                التاريخ: ${props.createdAt || new Date().toLocaleString('ar')}
+            `.trim();
+            
+            kml += `<Placemark>
+<name>${name}</name>
+<description><![CDATA[${description}]]></description>
+<Style>
+<LineStyle>
+<color>ff1a73e8</color>
+<width>2</width>
+</LineStyle>
+<PolyStyle>
+<color>401a73e8</color>
+</PolyStyle>
+</Style>`;
+            
+            if (feature.geometry.type === 'Point') {
+                const coords = feature.geometry.coordinates;
+                kml += `<Point><coordinates>${coords[0]},${coords[1]},0</coordinates></Point>`;
+            } else if (feature.geometry.type === 'LineString') {
+                const coords = feature.geometry.coordinates;
+                kml += `<LineString><coordinates>`;
+                coords.forEach(coord => {
+                    kml += `${coord[0]},${coord[1]},0 `;
+                });
+                kml += `</coordinates></LineString>`;
+            } else if (feature.geometry.type === 'Polygon') {
+                const coords = feature.geometry.coordinates[0];
+                kml += `<Polygon><outerBoundaryIs><LinearRing><coordinates>`;
+                coords.forEach(coord => {
+                    kml += `${coord[0]},${coord[1]},0 `;
+                });
+                kml += `</coordinates></LinearRing></outerBoundaryIs></Polygon>`;
+            }
+            
+            kml += `</Placemark>`;
+        });
+        
+        kml += `</Document></kml>`;
+        return kml;
+    }
+    
+    // دوال المساعدة
+    function calculateLength(line) {
+        const latlngs = line.getLatLngs();
+        let totalLength = 0;
+        
+        for (let i = 1; i < latlngs.length; i++) {
+            totalLength += latlngs[i-1].distanceTo(latlngs[i]);
+        }
+        
+        return totalLength;
+    }
+    
+    function calculatePerimeter(polygon) {
+        const latlngs = polygon.getLatLngs()[0];
+        let perimeter = 0;
+        
+        for (let i = 0; i < latlngs.length; i++) {
+            const j = (i + 1) % latlngs.length;
+            perimeter += latlngs[i].distanceTo(latlngs[j]);
+        }
+        
+        return perimeter;
+    }
+    
+    function calculateArea(polygon) {
+        const latlngs = polygon.getLatLngs()[0];
+        let area = 0;
+        
+        if (latlngs.length < 3) return 0;
+        
+        for (let i = 0; i < latlngs.length; i++) {
+            const j = (i + 1) % latlngs.length;
+            area += latlngs[i].lng * latlngs[j].lat;
+            area -= latlngs[j].lng * latlngs[i].lat;
+        }
+        
+        area = Math.abs(area) * 0.5 * 111319.9 * 111319.9;
+        return area;
+    }
+    
+    function getCoordinatesInBothSystems(latlng) {
+        const wgs84 = `${latlng.lat.toFixed(6)}°, ${latlng.lng.toFixed(6)}°`;
+        let maroc = 'N/A';
+        
+        try {
+            const coords = proj4('EPSG:4326', 'EPSG:26191', [latlng.lng, latlng.lat]);
+            maroc = `${coords[0].toFixed(2)} م, ${coords[1].toFixed(2)} م`;
+        } catch (error) {
+            console.error('خطأ في التحويل:', error);
+        }
+        
+        return {
+            wgs84: wgs84,
+            maroc: maroc
+        };
+    }
+    
+    function getToolName(tool) {
+        const toolNames = {
+            'marker': 'وضع علامة',
+            'polyline': 'رسم خط',
+            'polygon': 'رسم مضلع'
+        };
+        return toolNames[tool] || tool;
+    }
+    
+    function getTypeName(type) {
+        const typeNames = {
+            'point': 'نقطة',
+            'line': 'خط',
+            'polygon': 'مضلع'
+        };
+        return typeNames[type] || type;
+    }
+    
+    function updateSystemInfo() {
+        $('#systemStatus').text('جاهز');
+    }
+    
+    function updatePanelButton() {
+        const isPanelVisible = $('#infoPanel').hasClass('show');
+        $('#togglePanelBtn').html(isPanelVisible ? 
+            '<i class="fas fa-chevron-right"></i>' : 
+            '<i class="fas fa-info-circle"></i>'
+        );
+    }
+    
+    // عرض الإشعارات
+    function showNotification(message, type = 'info') {
+        const notification = $(`
+            <div class="notification ${type}">
+                <div class="notification-icon">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">${type === 'success' ? 'نجاح' : type === 'error' ? 'خطأ' : 'معلومة'}</div>
+                    <div>${message}</div>
+                </div>
+            </div>
+        `);
+        
+        $('body').append(notification);
+        
+        setTimeout(() => {
+            notification.fadeOut(300, () => notification.remove());
+        }, 3000);
+    }
+    
+    // دوال عامة للاستخدام في النوافذ المنبثقة
+    window.renameElement = function(elementId) {
+        const element = elements.find(e => e.id === elementId);
+        if (element) {
+            const newName = prompt('أدخل الاسم الجديد:', element.name);
+            if (newName !== null && newName.trim() !== '') {
+                element.name = newName.trim();
+                updateElementsTable();
+                updateElementPopup(element.layer);
+                showNotification('تم تحديث اسم العنصر', 'success');
+            }
+        }
+    };
+    
+    window.downloadElement = function(elementId) {
+        const element = elements.find(e => e.id === elementId);
+        if (element) {
+            const featureCollection = {
+                type: "FeatureCollection",
+                features: [element.layer.toGeoJSON()]
+            };
+            
+            featureCollection.features[0].properties = {
+                name: element.name,
+                type: element.type,
+                location: element.location,
+                createdAt: element.createdAt,
+                coordinates: element.coordinates
+            };
+            
+            if (element.type === 'line') {
+                featureCollection.features[0].properties.length = element.measurements.length;
+                featureCollection.features[0].properties.lengthKm = element.measurements.lengthKm;
+            } else if (element.type === 'polygon') {
+                featureCollection.features[0].properties.area = element.measurements.area;
+                featureCollection.features[0].properties.areaHectares = element.measurements.areaHectares;
+                featureCollection.features[0].properties.perimeter = element.measurements.perimeter;
+                featureCollection.features[0].properties.perimeterKm = element.measurements.perimeterKm;
+            }
+            
+            const data = JSON.stringify(featureCollection, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            saveAs(blob, `${element.name}_${Date.now()}.geojson`);
+            
+            showNotification(`تم تنزيل العنصر: ${element.name}`, 'success');
+        }
+    };
+    
+    window.viewOnMap = function(elementId) {
+        const element = elements.find(e => e.id === elementId);
+        if (element) {
+            // إغلاق اللوحة الجانبية
+            $('#infoPanel').removeClass('show');
+            
+            // التركيز على الخريطة
+            if (element.type === 'point') {
+                const latlng = element.layer.getLatLng();
+                map.setView(latlng, 16);
+                element.layer.openPopup();
+            } else {
+                const bounds = element.layer.getBounds();
+                map.fitBounds(bounds);
+                element.layer.openPopup();
+            }
+            
+            showNotification(`تم عرض العنصر: ${element.name} على الخريطة`, 'success');
+        }
+    };
+    
+    window.exportSystemData = exportSystemData;
+    </script>
+
+<script></script><script></script></body></html>
