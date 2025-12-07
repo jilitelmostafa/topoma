@@ -1,12 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" class=""><head><script>window.livecodes = window.livecodes || {};</script><title>Untitled Project</title><meta name="title" content="Untitled Project"><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><style id="__livecodes_styles__"></style><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script><script type="importmap">{
-  "imports": {}
-}</script></head><body>
-<script>window.livecodes = window.livecodes || {};</script><title>نظام خرائط متقدم</title><meta name="title" content="نظام خرائط متقدم"><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><style id="__livecodes_styles__"></style><script src="https://cdn.jsdelivr.net/npm/es-module-shims@1.10.0/dist/es-module-shims.js" async=""></script>
-
-
+<html lang="ar" dir="rtl">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام خرائط متقدم - تحديد وقياس</title>
@@ -39,14 +33,12 @@
             overflow: hidden;
         }
         
-        /* الحاوية الرئيسية */
         .app-container {
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
         
-        /* شريط العنوان */
         .header {
             background: white;
             padding: 12px 20px;
@@ -81,7 +73,6 @@
             margin: 0;
         }
         
-        /* اختيار الإسقاط */
         .projection-selector {
             display: flex;
             align-items: center;
@@ -109,7 +100,6 @@
             border-color: var(--primary-color);
         }
         
-        /* المحتوى الرئيسي */
         .main-content {
             flex: 1;
             display: flex;
@@ -117,14 +107,12 @@
             position: relative;
         }
         
-        /* الخريطة */
         #map {
             flex: 1;
             background: #e9ecef;
             z-index: 1;
         }
         
-        /* لوحة المعلومات الجانبية */
         .info-panel {
             width: 400px;
             background: white;
@@ -186,7 +174,6 @@
             color: var(--primary-color);
         }
         
-        /* حقل الإحداثيات */
         .coordinate-inputs {
             background: #f8f9fa;
             border-radius: 8px;
@@ -226,7 +213,6 @@
             margin-bottom: 0;
         }
         
-        /* نتائج القياس */
         .measurement-results {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -277,7 +263,6 @@
             opacity: 0.8;
         }
         
-        /* أزرار الأدوات */
         .tools-buttons {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -314,7 +299,6 @@
             margin-bottom: 8px;
         }
         
-        /* زر موقعي */
         .location-btn {
             background: var(--secondary-color);
             color: white;
@@ -337,7 +321,6 @@
             transform: translateY(-2px);
         }
         
-        /* زر عرض/إخفاء اللوحة */
         .toggle-panel-btn {
             position: absolute;
             top: 15px;
@@ -356,7 +339,6 @@
             color: var(--primary-color);
         }
         
-        /* جدول العناصر المرسومة */
         .data-table {
             width: 100%;
             border-collapse: collapse;
@@ -385,7 +367,6 @@
             background: #f5f5f5;
         }
         
-        /* أزرار الإجراءات في الجدول */
         .table-actions {
             display: flex;
             gap: 5px;
@@ -422,7 +403,6 @@
             transform: translateY(-1px);
         }
         
-        /* تصميم البوب أب */
         .custom-popup .leaflet-popup-content-wrapper {
             border-radius: 8px;
             padding: 0;
@@ -515,7 +495,6 @@
             color: var(--dark-color);
         }
         
-        /* زر تنزيل في معلومات النظام */
         .download-btn-container {
             display: flex;
             justify-content: center;
@@ -542,7 +521,6 @@
             transform: translateY(-2px);
         }
         
-        /* أيقونة موقعي على الخريطة */
         .my-location-icon {
             background: #1a73e8;
             border-radius: 50%;
@@ -564,67 +542,6 @@
             border-radius: 50%;
         }
         
-        /* استجابة للهواتف */
-        @media (max-width: 768px) {
-            .info-panel {
-                position: fixed;
-                top: 0;
-                right: 0;
-                height: 100%;
-                width: 100%;
-                max-width: 100%;
-                transform: translateX(100%);
-            }
-            
-            .info-panel.show {
-                transform: translateX(0);
-            }
-            
-            .projection-selector {
-                display: none;
-            }
-            
-            .toggle-panel-btn {
-                display: none;
-            }
-            
-            .data-table {
-                font-size: 10px;
-            }
-            
-            .table-actions {
-                flex-direction: column;
-                gap: 3px;
-            }
-            
-            .table-btn {
-                padding: 3px 5px;
-                font-size: 9px;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            .toggle-panel-btn {
-                display: flex;
-            }
-        }
-        
-        /* تحسينات عامة للخريطة */
-        .leaflet-container {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        .leaflet-control-attribution {
-            font-size: 10px !important;
-        }
-        
-        .leaflet-control-zoom {
-            border-radius: 6px !important;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        }
-        
-        /* إشعارات */
         .notification {
             position: fixed;
             bottom: 15px;
@@ -678,7 +595,6 @@
             color: var(--dark-color);
         }
         
-        /* حقل البحث */
         .search-box {
             position: absolute;
             top: 15px;
@@ -711,49 +627,106 @@
             font-weight: 600;
         }
         
-        /* شريط الأدوات على الخريطة */
-        .map-tools {
-            position: absolute;
-            top: 70px;
-            left: 15px;
+        /* تحسينات لشريط أدوات الرسم */
+        .leaflet-draw {
             background: white;
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-            padding: 8px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
+            padding: 5px;
         }
         
-        .map-tool-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            background: white;
+        .leaflet-draw-toolbar {
+            border: none;
+            margin-top: 0;
+        }
+        
+        .leaflet-draw-toolbar a {
+            background-color: white;
             border: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
+            border-radius: 4px;
             color: #666;
-            transition: all 0.3s ease;
         }
         
-        .map-tool-btn:hover {
+        .leaflet-draw-toolbar a:hover {
+            background-color: var(--primary-color);
             border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
-        
-        .map-tool-btn.active {
-            background: var(--primary-color);
             color: white;
-            border-color: var(--primary-color);
+        }
+        
+        .leaflet-draw-actions {
+            right: 42px;
+            top: 0;
+        }
+        
+        /* إزالة أزرار الأدوات الجانبية */
+        .map-tools {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .info-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100%;
+                width: 100%;
+                max-width: 100%;
+                transform: translateX(100%);
+            }
+            
+            .info-panel.show {
+                transform: translateX(0);
+            }
+            
+            .projection-selector {
+                display: none;
+            }
+            
+            .toggle-panel-btn {
+                display: none;
+            }
+            
+            .data-table {
+                font-size: 10px;
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                gap: 3px;
+            }
+            
+            .table-btn {
+                padding: 3px 5px;
+                font-size: 9px;
+            }
+            
+            .search-box {
+                width: calc(100% - 30px);
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .toggle-panel-btn {
+                display: flex;
+            }
+        }
+        
+        .leaflet-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .leaflet-control-attribution {
+            font-size: 10px !important;
+        }
+        
+        .leaflet-control-zoom {
+            border-radius: 6px !important;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }
     </style>
-
-
+</head>
+<body>
     <div class="app-container">
         <!-- شريط العنوان -->
         <div class="header">
@@ -790,19 +763,6 @@
                 <input type="text" class="search-input" id="searchInput" placeholder="أدخل إحداثيات أو اسم مكان...">
                 <button class="search-btn" id="searchBtn">
                     <i class="fas fa-search"></i>
-                </button>
-            </div>
-            
-            <!-- أدوات الرسم على الخريطة -->
-            <div class="map-tools">
-                <button class="map-tool-btn" title="وضع علامة" data-tool="marker">
-                    <i class="fas fa-map-marker-alt"></i>
-                </button>
-                <button class="map-tool-btn" title="رسم خط" data-tool="polyline">
-                    <i class="fas fa-draw-polygon"></i>
-                </button>
-                <button class="map-tool-btn" title="رسم مضلع" data-tool="polygon">
-                    <i class="fas fa-shapes"></i>
                 </button>
             </div>
             
@@ -939,9 +899,6 @@
                         <div class="section-title">
                             <i class="fas fa-info-circle"></i>
                             معلومات النظام
-                            <button class="popup-btn primary" style="margin-right: auto; padding: 4px 8px; font-size: 10px;" onclick="exportSystemData()">
-                                <i class="fas fa-download"></i> تنزيل
-                            </button>
                         </div>
                         <div class="coordinate-inputs" style="padding: 10px;">
                             <div class="coord-field">
@@ -952,6 +909,12 @@
                                 <label>الحالة:</label>
                                 <div style="font-weight: 600; color: var(--secondary-color);" id="systemStatus">جاهز</div>
                             </div>
+                        </div>
+                        <div class="download-btn-container">
+                            <button class="download-system-btn" onclick="exportSystemData()">
+                                <i class="fas fa-download"></i>
+                                تنزيل معلومات النظام
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -975,9 +938,8 @@
     let drawControl;
     let elements = [];
     let elementCounter = 1;
-    let currentDrawingTool = null;
-    let geolocationWatchId = null;
     let myLocationMarker = null;
+    let geolocationWatchId = null;
     
     // تعريف أنظمة إسقاط المغرب
     proj4.defs("EPSG:26191", "+proj=lcc +lat_1=33.21666666666667 +lat_2=35 +lat_0=33.21666666666667 +lon_0=-5.4 +x_0=500000 +y_0=300000 +ellps=intl +units=m +no_defs");
@@ -1049,6 +1011,9 @@
         // إنشاء مجموعة العناصر المرسومة
         drawnItems = L.featureGroup().addTo(map);
         
+        // تفعيل أدوات الرسم تلقائياً
+        enableDrawingTools();
+        
         // تحديث الإحداثيات عند تحريك المؤشر
         map.on('mousemove', function(e) {
             updateCoordinateInputs(e.latlng);
@@ -1060,153 +1025,59 @@
         }, 100);
     }
     
-    // إعداد مستمعي الأحداث
-    function setupEventListeners() {
-        // اختيار نظام الإسقاط
-        $('.projection-btn').click(function() {
-            $('.projection-btn').removeClass('active');
-            $(this).addClass('active');
-            currentProjection = $(this).data('projection');
-            updateSystemInfo();
-        });
-        
-        // زر عرض/إخفاء لوحة المعلومات
-        $('#togglePanelBtn').click(function() {
-            $('#infoPanel').toggleClass('show');
-            updatePanelButton();
-        });
-        
-        // زر إغلاق اللوحة
-        $('#closePanelBtn').click(function() {
-            $('#infoPanel').removeClass('show');
-            updatePanelButton();
-        });
-        
-        // زر الانتقال إلى الإحداثيات
-        $('#gotoCoordsBtn').click(goToCoordinates);
-        
-        // أزرار الأدوات
-        $('.tool-btn').click(function() {
-            const action = $(this).data('action');
-            
-            switch(action) {
-                case 'mylocation':
-                    getMyLocation();
-                    break;
-                case 'export':
-                    exportData();
-                    break;
-                case 'clear':
-                    clearAllElements();
-                    break;
-                case 'table':
-                    showTable();
-                    break;
-            }
-        });
-        
-        // زر إظهار الجدول
-        $('#showTableBtn').click(showTable);
-        
-        // أزرار أدوات الرسم على الخريطة
-        $('.map-tool-btn').click(function() {
-            const tool = $(this).data('tool');
-            enableDrawingTool(tool);
-        });
-        
-        // زر البحث
-        $('#searchBtn').click(searchLocation);
-        $('#searchInput').keypress(function(e) {
-            if (e.which === 13) {
-                searchLocation();
-            }
-        });
-        
-        // تحديث الإحداثيات عند تغيير المدخلات
-        $('#coordXMaroc, #coordYMaroc').on('input', function() {
-            updateWGSFromMaroc();
-        });
-        
-        $('#coordLatWGS, #coordLonWGS').on('input', function() {
-            updateMarocFromWGS();
-        });
-    }
-    
-    // تفعيل أداة الرسم
-    function enableDrawingTool(tool) {
-        // إزالة الأداة الحالية
-        if (drawControl) {
-            map.removeControl(drawControl);
-        }
-        
-        // تحديث حالة الأزرار
-        $('.map-tool-btn').removeClass('active');
-        $(`.map-tool-btn[data-tool="${tool}"]`).addClass('active');
-        
-        currentDrawingTool = tool;
-        
+    // تفعيل أدوات الرسم الدائمة
+    function enableDrawingTools() {
         // إعدادات الرسم
         const drawOptions = {
             position: 'topright',
-            draw: {},
+            draw: {
+                polygon: {
+                    shapeOptions: {
+                        color: '#1a73e8',
+                        fillColor: '#1a73e8',
+                        fillOpacity: 0.3
+                    },
+                    allowIntersection: false,
+                    showArea: true,
+                    metric: true
+                },
+                polyline: {
+                    shapeOptions: {
+                        color: '#1a73e8',
+                        weight: 3
+                    },
+                    metric: true
+                },
+                rectangle: {
+                    shapeOptions: {
+                        color: '#1a73e8',
+                        fillColor: '#1a73e8',
+                        fillOpacity: 0.3
+                    },
+                    showArea: true,
+                    metric: true
+                },
+                circle: {
+                    shapeOptions: {
+                        color: '#1a73e8',
+                        fillColor: '#1a73e8',
+                        fillOpacity: 0.3
+                    },
+                    metric: true,
+                    showRadius: true
+                },
+                marker: {
+                    icon: L.divIcon({
+                        className: 'custom-marker',
+                        html: '<i class="fas fa-map-marker-alt" style="color: #1a73e8; font-size: 24px;"></i>',
+                        iconSize: [24, 24]
+                    })
+                }
+            },
             edit: {
                 featureGroup: drawnItems
             }
         };
-        
-        // إعدادات حسب نوع الأداة
-        switch(tool) {
-            case 'marker':
-                drawOptions.draw = {
-                    polygon: false,
-                    polyline: false,
-                    rectangle: false,
-                    circle: false,
-                    marker: {
-                        icon: L.divIcon({
-                            className: 'custom-marker',
-                            html: '<i class="fas fa-map-marker-alt" style="color: #1a73e8; font-size: 24px;"></i>',
-                            iconSize: [24, 24]
-                        })
-                    }
-                };
-                break;
-                
-            case 'polyline':
-                drawOptions.draw = {
-                    polygon: false,
-                    rectangle: false,
-                    circle: false,
-                    marker: false,
-                    polyline: {
-                        shapeOptions: {
-                            color: '#1a73e8',
-                            weight: 3
-                        },
-                        metric: true
-                    }
-                };
-                break;
-                
-            case 'polygon':
-                drawOptions.draw = {
-                    polyline: false,
-                    rectangle: false,
-                    circle: false,
-                    marker: false,
-                    polygon: {
-                        shapeOptions: {
-                            color: '#1a73e8',
-                            fillColor: '#1a73e8',
-                            fillOpacity: 0.3
-                        },
-                        allowIntersection: false,
-                        showArea: true,
-                        metric: true
-                    }
-                };
-                break;
-        }
         
         // إضافة أدوات الرسم
         drawControl = new L.Control.Draw(drawOptions);
@@ -1214,17 +1085,10 @@
         
         // إعداد مستمعي الأحداث للرسم
         setupDrawingEvents();
-        
-        showNotification(`أداة ${getToolName(tool)} مفعلة`, 'info');
     }
     
     // إعداد أحداث الرسم
     function setupDrawingEvents() {
-        // إزالة المستمعين السابقين
-        map.off('draw:created');
-        map.off('draw:edited');
-        map.off('draw:deleted');
-        
         // عند إنشاء شكل
         map.on('draw:created', function(e) {
             const layer = e.layer;
@@ -1249,6 +1113,10 @@
                     break;
                 case 'rectangle':
                     typeName = 'مستطيل';
+                    elementType = 'polygon';
+                    break;
+                case 'circle':
+                    typeName = 'دائرة';
                     elementType = 'polygon';
                     break;
             }
@@ -1301,13 +1169,79 @@
         });
     }
     
+    // إعداد مستمعي الأحداث
+    function setupEventListeners() {
+        // اختيار نظام الإسقاط
+        $('.projection-btn').click(function() {
+            $('.projection-btn').removeClass('active');
+            $(this).addClass('active');
+            currentProjection = $(this).data('projection');
+            updateSystemInfo();
+        });
+        
+        // زر عرض/إخفاء لوحة المعلومات
+        $('#togglePanelBtn').click(function() {
+            $('#infoPanel').toggleClass('show');
+            updatePanelButton();
+        });
+        
+        // زر إغلاق اللوحة
+        $('#closePanelBtn').click(function() {
+            $('#infoPanel').removeClass('show');
+            updatePanelButton();
+        });
+        
+        // زر الانتقال إلى الإحداثيات
+        $('#gotoCoordsBtn').click(goToCoordinates);
+        
+        // أزرار الأدوات
+        $('.tool-btn').click(function() {
+            const action = $(this).data('action');
+            
+            switch(action) {
+                case 'mylocation':
+                    getMyLocation();
+                    break;
+                case 'export':
+                    exportData();
+                    break;
+                case 'clear':
+                    clearAllElements();
+                    break;
+                case 'table':
+                    showTable();
+                    break;
+            }
+        });
+        
+        // زر إظهار الجدول
+        $('#showTableBtn').click(showTable);
+        
+        // زر البحث
+        $('#searchBtn').click(searchLocation);
+        $('#searchInput').keypress(function(e) {
+            if (e.which === 13) {
+                searchLocation();
+            }
+        });
+        
+        // تحديث الإحداثيات عند تغيير المدخلات
+        $('#coordXMaroc, #coordYMaroc').on('input', function() {
+            updateWGSFromMaroc();
+        });
+        
+        $('#coordLatWGS, #coordLonWGS').on('input', function() {
+            updateMarocFromWGS();
+        });
+    }
+    
     // الحصول على اسم الموقع الجغرافي
     function getLocationName(layer) {
         let center;
         
         if (layer instanceof L.Marker) {
             center = layer.getLatLng();
-        } else if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+        } else if (layer instanceof L.Polyline || layer instanceof L.Polygon || layer instanceof L.Rectangle || layer instanceof L.Circle) {
             const bounds = layer.getBounds();
             center = bounds.getCenter();
         } else {
@@ -1786,7 +1720,7 @@
                     map.removeLayer(myLocationMarker);
                 }
                 
-                // إنشاء أيقونة موقعي كما في جوجل
+                // إنشاء أيقونة موقعي
                 const myLocationIcon = L.divIcon({
                     className: 'my-location-icon',
                     html: '',
@@ -2195,15 +2129,6 @@
         };
     }
     
-    function getToolName(tool) {
-        const toolNames = {
-            'marker': 'وضع علامة',
-            'polyline': 'رسم خط',
-            'polygon': 'رسم مضلع'
-        };
-        return toolNames[tool] || tool;
-    }
-    
     function getTypeName(type) {
         const typeNames = {
             'point': 'نقطة',
@@ -2316,6 +2241,7 @@
     };
     
     window.exportSystemData = exportSystemData;
+    window.hideTable = hideTable;
     </script>
-
-<script></script><script></script></body></html>
+</body>
+</html>
