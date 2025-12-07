@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام خرائط متقدم - تحديد وقياس</title>
+    <title>Système de Cartographie Avancée - Délimitation et Mesure</title>
     
-    <!-- مكتبات CSS -->
+    <!-- Bibliothèques CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -18,6 +18,7 @@
             --danger-color: #ea4335;
             --dark-color: #202124;
             --light-color: #f8f9fa;
+            --polygon-color: #34a853; /* Couleur verte pour les polygones */
         }
         
         * {
@@ -220,7 +221,7 @@
             margin-bottom: 0;
         }
         
-        /* نتائج القياس كجدول */
+        /* Tableau des résultats de mesure */
         .measurement-table {
             width: 100%;
             border-collapse: collapse;
@@ -254,7 +255,7 @@
             border-bottom: none;
         }
         
-        /* أدوات التحكم الأفقية */
+        /* Outils de contrôle horizontaux */
         .horizontal-tools {
             display: flex;
             gap: 8px;
@@ -321,9 +322,31 @@
             transform: translateY(-2px);
         }
         
-        .toggle-panel-btn {
+        /* Bouton pour afficher/cacher le panneau sur mobile */
+        .mobile-panel-toggle {
             position: absolute;
             top: 15px;
+            left: 15px;
+            background: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        /* Bouton ma position sur la carte */
+        .my-location-map-btn {
+            position: absolute;
+  left: 20px; /* ← تم التغيير هنا من 100px إلى 20px */ 
+    bottom: 20px; /* ← تم التغيير هنا من 100px إلى 20px */
+
             right: 15px;
             background: white;
             width: 45px;
@@ -339,7 +362,12 @@
             color: var(--primary-color);
         }
         
-        /* جدول البيانات مع scrolling */
+        .my-location-map-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* Tableau des données avec défilement */
         .data-table-container {
             max-height: 300px;
             overflow-y: auto;
@@ -555,30 +583,6 @@
             border-radius: 50%;
         }
         
-        /* زر موقعي على الخريطة */
-        .my-location-map-btn {
-            position: absolute;
-            bottom: 100px;
-            right: 15px;
-            background: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            font-size: 18px;
-            color: var(--primary-color);
-        }
-        
-        .my-location-map-btn:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-        
         .notification {
             position: fixed;
             bottom: 15px;
@@ -632,7 +636,7 @@
             color: var(--dark-color);
         }
         
-        /* تحسينات لشريط أدوات الرسم */
+        /* Améliorations pour la barre d'outils de dessin */
         .leaflet-draw {
             background: white;
             border-radius: 8px;
@@ -663,7 +667,7 @@
             top: 0;
         }
         
-        /* مكونات معلومات النظام */
+        /* Composants d'information système */
         .system-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -691,7 +695,7 @@
             font-weight: 600;
         }
         
-        /* استجابة للهواتف */
+        /* Responsive pour mobiles */
         @media (max-width: 768px) {
             .info-panel {
                 position: fixed;
@@ -712,8 +716,8 @@
                 display: none;
             }
             
-            .toggle-panel-btn {
-                display: none;
+            .mobile-panel-toggle {
+                display: flex;
             }
             
             .data-table {
@@ -732,7 +736,7 @@
             }
             
             .my-location-map-btn {
-                bottom: 80px;
+                top: 120px;
                 right: 10px;
                 width: 40px;
                 height: 40px;
@@ -771,8 +775,8 @@
         }
         
         @media (min-width: 769px) {
-            .toggle-panel-btn {
-                display: flex;
+            .mobile-panel-toggle {
+                display: none;
             }
         }
         
@@ -793,204 +797,196 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- شريط العنوان -->
+        <!-- En-tête -->
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">
                     <i class="fas fa-map-marked-alt"></i>
                 </div>
                 <div class="logo-text">
-                   <h1>Création et téléchargement de données SIG</h1>
-
+                    <h1>Création et téléchargement de données SIG</h1>
                     <p>Google Satellite | Mesures précises des superficies et distances</p>
                 </div>
             </div>
-            
-            
         </div>
         
-        <!-- المحتوى الرئيسي -->
+        <!-- Contenu principal -->
         <div class="main-content">
-            <!-- الخريطة -->
+            <!-- Carte -->
             <div id="map"></div>
             
-            <!-- زر موقعي على الخريطة -->
-            <button class="my-location-map-btn" id="myLocationMapBtn" title="موقعي">
+            <!-- Bouton ma position sur la carte (près des outils de dessin) -->
+            <button class="my-location-map-btn" id="myLocationMapBtn" title="Ma position">
                 <i class="fas fa-location-crosshairs"></i>
             </button>
             
-        
+            <!-- Bouton pour afficher/cacher le panneau sur mobile -->
+            <button class="mobile-panel-toggle" id="mobilePanelToggle" title="Panneau de contrôle">
+                <i class="fas fa-bars"></i>
+            </button>
             
-            <!-- لوحة المعلومات -->
+            <!-- Panneau d'information -->
             <div class="info-panel" id="infoPanel">
                 <div class="panel-header">
-                    <h3><i class="fas fa-layer-group"></i> لوحة التحكم والقياس</h3>
+                    <h3><i class="fas fa-layer-group"></i> Panneau de Contrôle et Mesure</h3>
                     <button class="close-panel" id="closePanelBtn">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 
                 <div class="panel-content">
-                    <!-- المحتوى القابل للتمرير -->
+                    <!-- Contenu défilable -->
                     <div class="panel-scrollable">
-                        <!-- إدخال الإحداثيات -->
+                        <!-- Saisie des coordonnées -->
                         <div class="section">
                             <div class="section-title">
                                 <i class="fas fa-crosshairs"></i>
-                                إدخال الإحداثيات
+                                Saisie des Coordonnées
                             </div>
                             <div class="coordinate-inputs">
                                 <div class="coord-row">
                                     <div class="coord-field">
-                                        <label>X (متر - Maroc Lambert)</label>
-                                        <input type="text" class="coord-input" id="coordXMaroc" placeholder="مثال: 500000">
+                                        <label>X (mètres - Maroc Lambert)</label>
+                                        <input type="text" class="coord-input" id="coordXMaroc" placeholder="Exemple: 500000">
                                     </div>
                                     <div class="coord-field">
-                                        <label>Y (متر - Maroc Lambert)</label>
-                                        <input type="text" class="coord-input" id="coordYMaroc" placeholder="مثال: 3500000">
+                                        <label>Y (mètres - Maroc Lambert)</label>
+                                        <input type="text" class="coord-input" id="coordYMaroc" placeholder="Exemple: 3500000">
                                     </div>
                                 </div>
                                 <div class="coord-row">
                                     <div class="coord-field">
-                                        <label>خط العرض (درجات - WGS84)</label>
-                                        <input type="text" class="coord-input" id="coordLatWGS" placeholder="مثال: 31.63">
+                                        <label>Latitude (degrés - WGS84)</label>
+                                        <input type="text" class="coord-input" id="coordLatWGS" placeholder="Exemple: 31.63">
                                     </div>
                                     <div class="coord-field">
-                                        <label>خط الطول (درجات - WGS84)</label>
-                                        <input type="text" class="coord-input" id="coordLonWGS" placeholder="مثال: -7.99">
+                                        <label>Longitude (degrés - WGS84)</label>
+                                        <input type="text" class="coord-input" id="coordLonWGS" placeholder="Exemple: -7.99">
                                     </div>
                                 </div>
                                 <button class="location-btn" id="gotoCoordsBtn">
                                     <i class="fas fa-location-arrow"></i>
-                                    انتقال إلى الموقع
+                                    Aller à la position
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- معلومات النظام -->
+                        <!-- Informations système -->
                         <div class="section">
                             <div class="section-title">
                                 <i class="fas fa-info-circle"></i>
-                                معلومات النظام
+                                Informations Système
                             </div>
                             <div class="system-info-grid">
                                 <div class="system-info-item">
                                     <div class="system-info-value" id="drawnCount">0</div>
-                                    <div class="system-info-label">العناصر المرسومة</div>
+                                    <div class="system-info-label">Éléments dessinés</div>
                                 </div>
                                 <div class="system-info-item">
-                                    <div class="system-info-value" id="systemStatus" style="color: var(--secondary-color);">جاهز</div>
-                                    <div class="system-info-label">الحالة</div>
+                                    <div class="system-info-value" id="systemStatus" style="color: var(--secondary-color);">Prêt</div>
+                                    <div class="system-info-label">Statut</div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- نتائج القياس -->
+                        <!-- Résultats de mesure -->
                         <div class="section" id="measurementSection" style="display: none;">
                             <div class="section-title">
                                 <i class="fas fa-calculator"></i>
-                                نتائج القياس
+                                Résultats de Mesure
                             </div>
                             <table class="measurement-table" id="measurementTable">
                                 <thead>
                                     <tr>
-                                        <th>النوع</th>
-                                          <th>القيمة المحولة</th>
-                                        <th>القيمة الأساسية</th>
-                                      
+                                        <th>Type</th>
+                                        <th>Valeur convertie</th>
+                                        <th>Valeur de base</th>
                                     </tr>
                                 </thead>
                                 <tbody id="measurementTableBody">
-                                    <!-- البيانات تضاف هنا -->
+                                    <!-- Les données sont ajoutées ici -->
                                 </tbody>
                             </table>
                         </div>
 
-
-                         <!-- أدوات التحكم -->
+                        <!-- Outils de contrôle -->
                         <div class="section">
                             <div class="section-title">
                                 <i class="fas fa-tools"></i>
-                                أدوات التحكم
+                                Outils de Contrôle
                             </div>
                             <div class="horizontal-tools">
                                 <button class="horizontal-tool-btn" data-action="export">
                                     <i class="fas fa-download"></i>
-                                    <span>تنزيل الكل</span>
+                                    <span>Tout télécharger</span>
                                 </button>
                                 <button class="horizontal-tool-btn" data-action="clear">
                                     <i class="fas fa-trash-alt"></i>
-                                    <span>مسح الكل</span>
+                                    <span>Tout effacer</span>
                                 </button>
                                 <button class="horizontal-tool-btn" data-action="mylocation">
                                     <i class="fas fa-location-crosshairs"></i>
-                                    <span>موقعي</span>
+                                    <span>Ma position</span>
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- جدول البيانات -->
+                        <!-- Tableau des données -->
                         <div class="section">
                             <div class="section-title">
                                 <i class="fas fa-database"></i>
-                                جدول البيانات
+                                Tableau des Données
                             </div>
                             <div class="data-table-container">
                                 <table class="data-table" id="elementsTable">
                                     <thead>
                                         <tr>
-                                            <th>الاسم</th>
-                                            <th>النوع</th>
-                                            <th>الإحداثيات</th>
-                                            <th>المساحة/الطول</th>
-                                            <th>الإجراءات</th>
-                                            <th>التاريخ</th>
+                                            <th>Nom</th>
+                                            <th>Type</th>
+                                            <th>Coordonnées</th>
+                                            <th>Superficie/Longueur</th>
+                                            <th>Actions</th>
+                                            <th>Date</th>
                                         </tr>
                                     </thead>
                                     <tbody id="elementsTableBody">
-                                        <!-- البيانات تضاف هنا -->
+                                        <!-- Les données sont ajoutées ici -->
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        
-                       
                     </div>
-                    
 
-
-
-                    <!-- زر تنزيل جميع العناصر (ثابت في الأسفل) -->
+                    <!-- Téléchargement de tous les éléments -->
                     <div class="section" style="padding: 15px; border-top: 1px solid #eee; background: #f8f9fa;">
                         <button class="download-system-btn" onclick="downloadAllElements()">
                             <i class="fas fa-download"></i>
-                            تنزيل جميع العناصر
+                            Télécharger tous les éléments
                         </button>
                     </div>
 
-
-<!-- توقيع الموقع مع واتساب -->
-<div class="footer-signature" style="text-align: center; padding: 15px; font-family: Arial, sans-serif; font-size: 14px; color: #555;">
-    تم إنجاز هذا الموقع من طرف 
-    <span class="signature-name" style="font-weight: bold;">Jilit Mostafa</span>
-    |
-    <a href="mailto:jilitsig@gmail.com" title="البريد الإلكتروني" style="text-decoration: none; color: #007bff; margin: 0 5px;">
-        <i class="fas fa-envelope"></i> jilitsig@gmail.com
-    </a>
-    |
-    <a href="https://wa.me/212600000000" target="_blank" title="واتساب" style="text-decoration: none; color: #25D366; margin: 0 5px;">
-        <i class="fab fa-whatsapp"></i> +212 600 000 000
-    </a>
-    <div class="version" style="margin-top: 5px; font-size: 12px; color: #999;">
-        الإصدار 1.0 | © 2024 جميع الحقوق محفوظة
-    </div>
-</div>
+                    <!-- Signature du site avec WhatsApp -->
+                    <div class="footer-signature" style="text-align: center; padding: 15px; font-family: Arial, sans-serif; font-size: 14px; color: #555;">
+                        Ce site a été réalisé par 
+                        <span class="signature-name" style="font-weight: bold;">Jilit Mostafa</span>
+                        |
+                        <a href="mailto:jilitsig@gmail.com" title="E-mail" style="text-decoration: none; color: #007bff; margin: 0 5px;">
+                            <i class="fas fa-envelope"></i> jilitsig@gmail.com
+                        </a>
+                        |
+                        <a href="https://wa.me/+212668090285" target="_blank" title="WhatsApp" style="text-decoration: none; color: #25D366; margin: 0 5px;">
+                            <i class="fab fa-whatsapp"></i> +212 668 09 02 85
+                        </a>
+                        <div class="version" style="margin-top: 5px; font-size: 12px; color: #999;">
+                            Version 1.0 | © 2024 Tous droits réservés
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- مكتبات JavaScript -->
+    <!-- Bibliothèques JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
@@ -999,7 +995,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <script>
-    // تعريف المتغيرات العامة
+    // Définition des variables globales
     let map;
     let drawnItems;
     let currentProjection = 'wgs84';
@@ -1009,58 +1005,58 @@
     let myLocationMarker = null;
     let geolocationWatchId = null;
     
-    // تعريف أنظمة إسقاط المغرب
+    // Définition des systèmes de projection du Maroc
     proj4.defs("EPSG:26191", "+proj=lcc +lat_1=33.21666666666667 +lat_2=35 +lat_0=33.21666666666667 +lon_0=-5.4 +x_0=500000 +y_0=300000 +ellps=intl +units=m +no_defs");
     proj4.defs("EPSG:26192", "+proj=lcc +lat_1=29.66666666666667 +lat_2=31 +lat_0=29.66666666666667 +lon_0=-8.75 +x_0=600000 +y_0=300000 +ellps=intl +units=m +no_defs");
     proj4.defs("EPSG:26194", "+proj=lcc +lat_1=26.66666666666667 +lat_2=28 +lat_0=26.66666666666667 +lon_0=-12.1 +x_0=700000 +y_0=300000 +ellps=intl +units=m +no_defs");
     proj4.defs("EPSG:26195", "+proj=lcc +lat_1=24 +lat_2=25.5 +lat_0=24 +lon_0=-16 +x_0=800000 +y_0=300000 +ellps=intl +units=m +no_defs");
     
-    // أسماء المدن المغربية
+    // Noms des villes marocaines
     const moroccanCities = {
-        "الرباط": { lat: 33.9716, lng: -6.8498 },
-        "الدار البيضاء": { lat: 33.5731, lng: -7.5898 },
-        "مراكش": { lat: 31.6295, lng: -7.9811 },
-        "فاس": { lat: 34.0181, lng: -5.0078 },
-        "طنجة": { lat: 35.7595, lng: -5.8340 },
-        "مكناس": { lat: 33.8935, lng: -5.5473 },
-        "أكادير": { lat: 30.4278, lng: -9.5981 },
-        "وجدة": { lat: 34.6814, lng: -1.9002 },
-        "تطوان": { lat: 35.5889, lng: -5.3626 },
-        "الصويرة": { lat: 31.5085, lng: -9.7595 },
-        "أسفي": { lat: 32.2833, lng: -9.2333 },
-        "الجديدة": { lat: 33.2316, lng: -8.5007 },
-        "بن جرير": { lat: 32.2404, lng: -7.9612 },
-        "خريبكة": { lat: 32.8777, lng: -6.9062 },
-        "قنيطرة": { lat: 34.2541, lng: -6.5890 },
-        "تازة": { lat: 34.2150, lng: -4.0067 },
-        "الحسيمة": { lat: 35.2493, lng: -3.9373 },
-        "الناظور": { lat: 35.1688, lng: -2.9283 },
-        "ورزازات": { lat: 30.9202, lng: -6.9095 },
-        "السمارة": { lat: 26.7333, lng: -11.6833 },
-        "العيون": { lat: 27.1622, lng: -13.2033 },
-        "الداخلة": { lat: 23.7141, lng: -15.9368 }
+        "Rabat": { lat: 33.9716, lng: -6.8498 },
+        "Casablanca": { lat: 33.5731, lng: -7.5898 },
+        "Marrakech": { lat: 31.6295, lng: -7.9811 },
+        "Fès": { lat: 34.0181, lng: -5.0078 },
+        "Tanger": { lat: 35.7595, lng: -5.8340 },
+        "Meknès": { lat: 33.8935, lng: -5.5473 },
+        "Agadir": { lat: 30.4278, lng: -9.5981 },
+        "Oujda": { lat: 34.6814, lng: -1.9002 },
+        "Tétouan": { lat: 35.5889, lng: -5.3626 },
+        "Essaouira": { lat: 31.5085, lng: -9.7595 },
+        "Safi": { lat: 32.2833, lng: -9.2333 },
+        "El Jadida": { lat: 33.2316, lng: -8.5007 },
+        "Benguerir": { lat: 32.2404, lng: -7.9612 },
+        "Khouribga": { lat: 32.8777, lng: -6.9062 },
+        "Kénitra": { lat: 34.2541, lng: -6.5890 },
+        "Taza": { lat: 34.2150, lng: -4.0067 },
+        "Al Hoceïma": { lat: 35.2493, lng: -3.9373 },
+        "Nador": { lat: 35.1688, lng: -2.9283 },
+        "Ouarzazate": { lat: 30.9202, lng: -6.9095 },
+        "Smara": { lat: 26.7333, lng: -11.6833 },
+        "Laâyoune": { lat: 27.1622, lng: -13.2033 },
+        "Dakhla": { lat: 23.7141, lng: -15.9368 }
     };
     
-    // عند تحميل الصفحة
+    // Au chargement de la page
     $(document).ready(function() {
         initMap();
         setupEventListeners();
         updateElementsTable();
-        showNotification('نظام القياس الجغرافي جاهز للاستخدام', 'success');
+        showNotification('Système de mesure géographique prêt à l\'utilisation', 'success');
     });
     
-    // تهيئة الخريطة
+    // Initialisation de la carte
     function initMap() {
-        // إنشاء الخريطة
+        // Création de la carte
         map = L.map('map', {
-            center: [31.63, -7.99], // وسط المغرب
+            center: [31.63, -7.99], // Centre du Maroc
             zoom: 8,
             zoomControl: true,
             attributionControl: true,
             preferCanvas: true
         });
         
-        // إضافة خريطة جوجل القمرية
+        // Ajout de la carte satellite Google
         L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
             attribution: '© Google Satellite',
             maxZoom: 20,
@@ -1068,7 +1064,7 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(map);
         
-        // إضافة أسماء المواقع (Labels)
+        // Ajout des noms de lieux (Labels)
         L.tileLayer('https://mt1.google.com/vt/lyrs=h&x={x}&y={y}&z={z}', {
             attribution: '© Google Maps',
             maxZoom: 20,
@@ -1076,33 +1072,33 @@
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(map);
         
-        // إنشاء مجموعة العناصر المرسومة
+        // Création du groupe d'éléments dessinés
         drawnItems = L.featureGroup().addTo(map);
         
-        // تفعيل أدوات الرسم تلقائياً
+        // Activation automatique des outils de dessin
         enableDrawingTools();
         
-        // تحديث الإحداثيات عند تحريك المؤشر
+        // Mise à jour des coordonnées lors du déplacement du curseur
         map.on('mousemove', function(e) {
             updateCoordinateInputs(e.latlng);
         });
         
-        // تحديث حجم الخريطة
+        // Mise à jour de la taille de la carte
         setTimeout(() => {
             map.invalidateSize();
         }, 100);
     }
     
-    // تفعيل أدوات الرسم الدائمة
+    // Activation des outils de dessin permanents
     function enableDrawingTools() {
-        // إعدادات الرسم
+        // Paramètres de dessin
         const drawOptions = {
             position: 'topright',
             draw: {
                 polygon: {
                     shapeOptions: {
-                        color: '#1a73e8',
-                        fillColor: '#1a73e8',
+                        color: '#34a853', // Couleur verte pour les polygones
+                        fillColor: '#34a853',
                         fillOpacity: 0.3
                     },
                     allowIntersection: false,
@@ -1118,8 +1114,8 @@
                 },
                 rectangle: {
                     shapeOptions: {
-                        color: '#1a73e8',
-                        fillColor: '#1a73e8',
+                        color: '#34a853', // Couleur verte pour les rectangles
+                        fillColor: '#34a853',
                         fillOpacity: 0.3
                     },
                     showArea: true,
@@ -1127,8 +1123,8 @@
                 },
                 circle: {
                     shapeOptions: {
-                        color: '#1a73e8',
-                        fillColor: '#1a73e8',
+                        color: '#34a853', // Couleur verte pour les cercles
+                        fillColor: '#34a853',
                         fillOpacity: 0.3
                     },
                     metric: true,
@@ -1147,68 +1143,68 @@
             }
         };
         
-        // إضافة أدوات الرسم
+        // Ajout des outils de dessin
         drawControl = new L.Control.Draw(drawOptions);
         map.addControl(drawControl);
         
-        // إعداد مستمعي الأحداث للرسم
+        // Configuration des écouteurs d'événements pour le dessin
         setupDrawingEvents();
     }
     
-    // إعداد أحداث الرسم
+    // Configuration des événements de dessin
     function setupDrawingEvents() {
-        // عند إنشاء شكل
+        // Lors de la création d'une forme
         map.on('draw:created', function(e) {
             const layer = e.layer;
             const type = e.layerType;
             
-            // تحديد اسم النوع
+            // Détermination du nom du type
             let typeName = '';
             let elementType = '';
             
             switch(type) {
                 case 'marker':
-                    typeName = 'نقطة';
+                    typeName = 'Point';
                     elementType = 'point';
                     break;
                 case 'polyline':
-                    typeName = 'خط';
+                    typeName = 'Ligne';
                     elementType = 'line';
                     break;
                 case 'polygon':
-                    typeName = 'مضلع';
+                    typeName = 'Polygone';
                     elementType = 'polygon';
                     break;
                 case 'rectangle':
-                    typeName = 'مستطيل';
+                    typeName = 'Rectangle';
                     elementType = 'polygon';
                     break;
                 case 'circle':
-                    typeName = 'دائرة';
+                    typeName = 'Cercle';
                     elementType = 'polygon';
                     break;
             }
             
-            // الحصول على الموقع الجغرافي لتحديد الاسم
+            // Obtention de l'emplacement géographique pour déterminer le nom
             const location = getLocationName(layer);
             
-            // إنشاء اسم تلقائي للعنصر
+            // Création d'un nom automatique pour l'élément
             const elementName = `${typeName} ${elementCounter} ${location}`;
             
-            // إضافة العنصر تلقائياً بدون طلب الاسم
+            // Ajout de l'élément automatiquement sans demander le nom
             addElement(layer, elementName, elementType, type);
             elementCounter++;
             
-            // إضافة النافذة المنبثقة
+            // Ajout de la fenêtre contextuelle
             addPopupToElement(layer, elementName, elementType);
             
-            // عرض نتائج القياس
+            // Affichage des résultats de mesure
             showMeasurementResults(layer, elementType);
             
-            showNotification(`تم إنشاء ${typeName}: ${elementName}`, 'success');
+            showNotification(`${typeName} créé: ${elementName}`, 'success');
         });
         
-        // عند تحرير شكل
+        // Lors de l'édition d'une forme
         map.on('draw:edited', function(e) {
             const layers = e.layers;
             layers.eachLayer(function(layer) {
@@ -1218,22 +1214,22 @@
                     showMeasurementResults(layer, element.type);
                 }
             });
-            showNotification('تم تحرير العنصر', 'info');
+            showNotification('Élément modifié', 'info');
         });
         
-        // عند حذف شكل
+        // Lors de la suppression d'une forme
         map.on('draw:deleted', function(e) {
             const layers = e.layers;
             layers.eachLayer(function(layer) {
                 removeElement(layer);
             });
-            showNotification('تم حذف العنصر', 'info');
+            showNotification('Élément supprimé', 'info');
         });
     }
     
-    // إعداد مستمعي الأحداث
+    // Configuration des écouteurs d'événements
     function setupEventListeners() {
-        // اختيار نظام الإسقاط
+        // Sélection du système de projection
         $('.projection-btn').click(function() {
             $('.projection-btn').removeClass('active');
             $(this).addClass('active');
@@ -1241,23 +1237,23 @@
             updateSystemInfo();
         });
         
-        // زر عرض/إخفاء لوحة المعلومات
-        $('#togglePanelBtn').click(function() {
+        // Bouton pour afficher/cacher le panneau sur mobile
+        $('#mobilePanelToggle').click(function() {
             $('#infoPanel').toggleClass('show');
-            updatePanelButton();
         });
         
-        // زر إغلاق اللوحة
+        // Bouton de fermeture du panneau
         $('#closePanelBtn').click(function() {
             $('#infoPanel').removeClass('show');
-            updatePanelButton();
         });
         
-        
-        // زر الانتقال إلى الإحداثيات
+        // Bouton pour aller aux coordonnées
         $('#gotoCoordsBtn').click(goToCoordinates);
         
-        // أزرار الأدوات الأفقية
+        // Bouton ma position sur la carte
+        $('#myLocationMapBtn').click(getMyLocation);
+        
+        // Boutons des outils horizontaux
         $('.horizontal-tool-btn').click(function() {
             const action = $(this).data('action');
             
@@ -1274,7 +1270,7 @@
             }
         });
         
-        // تحديث الإحداثيات عند تغيير المدخلات
+        // Mise à jour des coordonnées lors de la modification des entrées
         $('#coordXMaroc, #coordYMaroc').on('input', function() {
             updateWGSFromMaroc();
         });
@@ -1284,7 +1280,7 @@
         });
     }
     
-    // الحصول على اسم الموقع الجغرافي
+    // Obtention du nom de l'emplacement géographique
     function getLocationName(layer) {
         let center;
         
@@ -1297,7 +1293,7 @@
             return '';
         }
         
-        // حساب المسافات إلى المدن الرئيسية
+        // Calcul des distances aux villes principales
         let closestCity = '';
         let minDistance = Infinity;
         
@@ -1309,21 +1305,21 @@
             }
         }
         
-        // تحديد الوصف حسب المسافة
+        // Détermination de la description selon la distance
         if (minDistance < 10) {
-            return `في ${closestCity}`;
+            return `à ${closestCity}`;
         } else if (minDistance < 30) {
-            return `قرب ${closestCity}`;
+            return `près de ${closestCity}`;
         } else if (minDistance < 100) {
-            return `بجوار ${closestCity}`;
+            return `à proximité de ${closestCity}`;
         } else {
-            return `بالقرب من ${closestCity}`;
+            return `près de ${closestCity}`;
         }
     }
     
-    // حساب المسافة بين نقطتين
+    // Calcul de la distance entre deux points
     function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371; // نصف قطر الأرض بالكيلومتر
+        const R = 6371; // Rayon de la Terre en kilomètres
         const dLat = (lat2 - lat1) * Math.PI / 180;
         const dLon = (lon2 - lon1) * Math.PI / 180;
         const a = 
@@ -1334,7 +1330,7 @@
         return R * c;
     }
     
-    // إضافة عنصر إلى القائمة
+    // Ajout d'un élément à la liste
     function addElement(layer, name, type, drawType) {
         const element = {
             id: Date.now(),
@@ -1343,7 +1339,7 @@
             drawType: drawType,
             layer: layer,
             location: getLocationName(layer),
-            createdAt: new Date().toLocaleString('ar'),
+            createdAt: new Date().toLocaleString('fr'),
             measurements: getMeasurements(layer, type),
             coordinates: getElementCoordinates(layer, type)
         };
@@ -1351,14 +1347,14 @@
         elements.push(element);
         drawnItems.addLayer(layer);
         
-        // حفظ المرجع في الطبقة
+        // Sauvegarde de la référence dans la couche
         layer.elementId = element.id;
         
         updateElementsTable();
         updateDrawnCount();
     }
     
-    // الحصول على إحداثيات العنصر
+    // Obtention des coordonnées de l'élément
     function getElementCoordinates(layer, type) {
         const coordinates = {
             wgs84: '',
@@ -1371,7 +1367,7 @@
             
             try {
                 const marocCoords = proj4('EPSG:4326', 'EPSG:26191', [latlng.lng, latlng.lat]);
-                coordinates.maroc = `${marocCoords[0].toFixed(2)} م, ${marocCoords[1].toFixed(2)} م`;
+                coordinates.maroc = `${marocCoords[0].toFixed(2)} m, ${marocCoords[1].toFixed(2)} m`;
             } catch (error) {
                 coordinates.maroc = 'N/A';
             }
@@ -1384,7 +1380,7 @@
                 
                 try {
                     const marocCoords = proj4('EPSG:4326', 'EPSG:26191', [firstPoint.lng, firstPoint.lat]);
-                    coordinates.maroc = `${marocCoords[0].toFixed(2)} م, ${marocCoords[1].toFixed(2)} م`;
+                    coordinates.maroc = `${marocCoords[0].toFixed(2)} m, ${marocCoords[1].toFixed(2)} m`;
                 } catch (error) {
                     coordinates.maroc = 'N/A';
                 }
@@ -1397,7 +1393,7 @@
             
             try {
                 const marocCoords = proj4('EPSG:4326', 'EPSG:26191', [center.lng, center.lat]);
-                coordinates.maroc = `${marocCoords[0].toFixed(2)} م, ${marocCoords[1].toFixed(2)} م`;
+                coordinates.maroc = `${marocCoords[0].toFixed(2)} m, ${marocCoords[1].toFixed(2)} m`;
             } catch (error) {
                 coordinates.maroc = 'N/A';
             }
@@ -1406,7 +1402,7 @@
         return coordinates;
     }
     
-    // الحصول على قياسات العنصر
+    // Obtention des mesures de l'élément
     function getMeasurements(layer, type) {
         const measurements = {};
         
@@ -1425,7 +1421,7 @@
         return measurements;
     }
     
-    // تحديث نافذة العنصر المنبثقة
+    // Mise à jour de la fenêtre contextuelle de l'élément
     function addPopupToElement(layer, name, type) {
         let content = '';
         const element = elements.find(e => e.id === layer.elementId);
@@ -1441,11 +1437,11 @@
                     </div>
                     <div class="popup-content">
                         <div class="popup-row">
-                            <span class="popup-label">النوع:</span>
-                            <span class="popup-value">نقطة</span>
+                            <span class="popup-label">Type:</span>
+                            <span class="popup-value">Point</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">الموقع:</span>
+                            <span class="popup-label">Emplacement:</span>
                             <span class="popup-value">${element.location}</span>
                         </div>
                         <div class="popup-row">
@@ -1453,16 +1449,16 @@
                             <span class="popup-value">${coords.wgs84}</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">المغرب (متر):</span>
+                            <span class="popup-label">Maroc (mètres):</span>
                             <span class="popup-value">${coords.maroc}</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">التاريخ:</span>
+                            <span class="popup-label">Date:</span>
                             <span class="popup-value">${element.createdAt}</span>
                         </div>
                         <div class="popup-actions">
-                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">تعديل الاسم</button>
-                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">تنزيل</button>
+                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">Modifier le nom</button>
+                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">Télécharger</button>
                         </div>
                     </div>
                 `;
@@ -1478,28 +1474,28 @@
                     </div>
                     <div class="popup-content">
                         <div class="popup-row">
-                            <span class="popup-label">النوع:</span>
-                            <span class="popup-value">خط</span>
+                            <span class="popup-label">Type:</span>
+                            <span class="popup-value">Ligne</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">الموقع:</span>
+                            <span class="popup-label">Emplacement:</span>
                             <span class="popup-value">${element.location}</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">الطول:</span>
-                            <span class="popup-value">${length.toFixed(2)} م</span>
+                            <span class="popup-label">Longueur:</span>
+                            <span class="popup-value">${length.toFixed(2)} m</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">الطول:</span>
-                            <span class="popup-value">${lengthKm} كم</span>
+                            <span class="popup-label">Longueur:</span>
+                            <span class="popup-value">${lengthKm} km</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">التاريخ:</span>
+                            <span class="popup-label">Date:</span>
                             <span class="popup-value">${element.createdAt}</span>
                         </div>
                         <div class="popup-actions">
-                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">تعديل الاسم</button>
-                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">تنزيل</button>
+                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">Modifier le nom</button>
+                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">Télécharger</button>
                         </div>
                     </div>
                 `;
@@ -1517,36 +1513,36 @@
                     </div>
                     <div class="popup-content">
                         <div class="popup-row">
-                            <span class="popup-label">النوع:</span>
-                            <span class="popup-value">مضلع</span>
+                            <span class="popup-label">Type:</span>
+                            <span class="popup-value">Polygone</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">الموقع:</span>
+                            <span class="popup-label">Emplacement:</span>
                             <span class="popup-value">${element.location}</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">المساحة:</span>
-                            <span class="popup-value">${area.toFixed(2)} م²</span>
+                            <span class="popup-label">Superficie:</span>
+                            <span class="popup-value">${area.toFixed(2)} m²</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">المساحة:</span>
-                            <span class="popup-value">${areaHectares} هكتار</span>
+                            <span class="popup-label">Superficie:</span>
+                            <span class="popup-value">${areaHectares} hectare</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">المحيط:</span>
-                            <span class="popup-value">${perimeter.toFixed(2)} م</span>
+                            <span class="popup-label">Périmètre:</span>
+                            <span class="popup-value">${perimeter.toFixed(2)} m</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">المحيط:</span>
-                            <span class="popup-value">${perimeterKm} كم</span>
+                            <span class="popup-label">Périmètre:</span>
+                            <span class="popup-value">${perimeterKm} km</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">التاريخ:</span>
+                            <span class="popup-label">Date:</span>
                             <span class="popup-value">${element.createdAt}</span>
                         </div>
                         <div class="popup-actions">
-                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">تعديل الاسم</button>
-                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">تنزيل</button>
+                            <button class="popup-btn secondary" onclick="renameElement(${layer.elementId})">Modifier le nom</button>
+                            <button class="popup-btn primary" onclick="downloadElement(${layer.elementId})">Télécharger</button>
                         </div>
                     </div>
                 `;
@@ -1559,7 +1555,7 @@
         }).openPopup();
     }
     
-    // تحديث نافذة العنصر المنبثقة
+    // Mise à jour de la fenêtre contextuelle de l'élément
     function updateElementPopup(layer) {
         const element = elements.find(e => e.id === layer.elementId);
         if (element) {
@@ -1567,7 +1563,7 @@
         }
     }
     
-    // إزالة عنصر من القائمة
+    // Suppression d'un élément de la liste
     function removeElement(layer) {
         const index = elements.findIndex(e => e.id === layer.elementId);
         if (index !== -1) {
@@ -1577,7 +1573,7 @@
         }
     }
     
-    // تحديث جدول العناصر
+    // Mise à jour du tableau des éléments
     function updateElementsTable() {
         const tbody = $('#elementsTableBody');
         tbody.empty();
@@ -1587,39 +1583,39 @@
             let coordinateText = '';
             
             if (element.type === 'point') {
-                measurementText = 'نقطة';
+                measurementText = 'Point';
                 coordinateText = `
                     <div style="font-size: 9px; color: #666;">
                         <strong>WGS84:</strong> ${element.coordinates.wgs84}<br>
-                        <strong>المغرب:</strong> ${element.coordinates.maroc}
+                        <strong>Maroc:</strong> ${element.coordinates.maroc}
                     </div>
                 `;
             } else if (element.type === 'line') {
                 measurementText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>الطول:</strong> ${element.measurements.length.toFixed(2)} م<br>
-                        <strong>الطول:</strong> ${element.measurements.lengthKm} كم
+                        <strong>Longueur:</strong> ${element.measurements.length.toFixed(2)} m<br>
+                        <strong>Longueur:</strong> ${element.measurements.lengthKm} km
                     </div>
                 `;
                 coordinateText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>بداية:</strong> ${element.coordinates.wgs84}<br>
-                        <strong>المغرب:</strong> ${element.coordinates.maroc}
+                        <strong>Début:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>Maroc:</strong> ${element.coordinates.maroc}
                     </div>
                 `;
             } else if (element.type === 'polygon') {
                 measurementText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>المساحة:</strong> ${element.measurements.area.toFixed(2)} م²<br>
-                        <strong>المساحة:</strong> ${element.measurements.areaHectares} هكتار<br>
-                        <strong>المحيط:</strong> ${element.measurements.perimeter.toFixed(2)} م<br>
-                        <strong>المحيط:</strong> ${element.measurements.perimeterKm} كم
+                        <strong>Superficie:</strong> ${element.measurements.area.toFixed(2)} m²<br>
+                        <strong>Superficie:</strong> ${element.measurements.areaHectares} hectare<br>
+                        <strong>Périmètre:</strong> ${element.measurements.perimeter.toFixed(2)} m<br>
+                        <strong>Périmètre:</strong> ${element.measurements.perimeterKm} km
                     </div>
                 `;
                 coordinateText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>المركز:</strong> ${element.coordinates.wgs84}<br>
-                        <strong>المغرب:</strong> ${element.coordinates.maroc}
+                        <strong>Centre:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>Maroc:</strong> ${element.coordinates.maroc}
                     </div>
                 `;
             }
@@ -1632,11 +1628,11 @@
                     <td>${measurementText}</td>
                     <td>
                         <div class="table-actions">
-                            <button class="table-btn view" onclick="viewOnMap(${element.id})" title="عرض على الخريطة">
-                                <i class="fas fa-map-marker-alt"></i> عرض
+                            <button class="table-btn view" onclick="viewOnMap(${element.id})" title="Afficher sur la carte">
+                                <i class="fas fa-map-marker-alt"></i> Afficher
                             </button>
-                            <button class="table-btn download" onclick="downloadElement(${element.id})" title="تنزيل العنصر">
-                                <i class="fas fa-download"></i> تحميل
+                            <button class="table-btn download" onclick="downloadElement(${element.id})" title="Télécharger l'élément">
+                                <i class="fas fa-download"></i> Télécharger
                             </button>
                         </div>
                     </td>
@@ -1647,29 +1643,29 @@
             tbody.append(row);
         });
         
-        // تحديث عدد العناصر
+        // Mise à jour du nombre d'éléments
         updateDrawnCount();
     }
     
-    // تحديث عدد العناصر المرسومة
+    // Mise à jour du nombre d'éléments dessinés
     function updateDrawnCount() {
         $('#drawnCount').text(elements.length);
     }
     
-    // تحديث حقول الإحداثيات
+    // Mise à jour des champs de coordonnées
     function updateCoordinateInputs(latlng) {
         const lat = latlng.lat;
         const lng = latlng.lng;
         
-        // تحديث WGS84
+        // Mise à jour WGS84
         $('#coordLatWGS').val(lat.toFixed(6));
         $('#coordLonWGS').val(lng.toFixed(6));
         
-        // تحديث Maroc Lambert
+        // Mise à jour Maroc Lambert
         updateMarocFromWGS();
     }
     
-    // تحديث Maroc من WGS84
+    // Mise à jour Maroc depuis WGS84
     function updateMarocFromWGS() {
         const lat = parseFloat($('#coordLatWGS').val());
         const lng = parseFloat($('#coordLonWGS').val());
@@ -1680,12 +1676,12 @@
                 $('#coordXMaroc').val(coords[0].toFixed(2));
                 $('#coordYMaroc').val(coords[1].toFixed(2));
             } catch (error) {
-                console.error('خطأ في التحويل:', error);
+                console.error('Erreur de conversion:', error);
             }
         }
     }
     
-    // تحديث WGS84 من Maroc
+    // Mise à jour WGS84 depuis Maroc
     function updateWGSFromMaroc() {
         const x = parseFloat($('#coordXMaroc').val());
         const y = parseFloat($('#coordYMaroc').val());
@@ -1696,32 +1692,32 @@
                 $('#coordLatWGS').val(coords[1].toFixed(6));
                 $('#coordLonWGS').val(coords[0].toFixed(6));
             } catch (error) {
-                console.error('خطأ في التحويل:', error);
+                console.error('Erreur de conversion:', error);
             }
         }
     }
     
-    // الانتقال إلى الإحداثيات
+    // Aller aux coordonnées
     function goToCoordinates() {
         const lat = parseFloat($('#coordLatWGS').val());
         const lng = parseFloat($('#coordLonWGS').val());
         
         if (!isNaN(lat) && !isNaN(lng)) {
             map.setView([lat, lng], 15);
-            showNotification(`تم الانتقال إلى: ${lat.toFixed(6)}°, ${lng.toFixed(6)}°`, 'success');
+            showNotification(`Aller à: ${lat.toFixed(6)}°, ${lng.toFixed(6)}°`, 'success');
         } else {
-            showNotification('الرجاء إدخال إحداثيات صحيحة', 'error');
+            showNotification('Veuillez saisir des coordonnées valides', 'error');
         }
     }
     
-    // الحصول على موقعي
+    // Obtention de ma position
     function getMyLocation() {
         if (!navigator.geolocation) {
-            showNotification('المتصفح لا يدعم تحديد الموقع', 'error');
+            showNotification('Le navigateur ne prend pas en charge la géolocalisation', 'error');
             return;
         }
         
-        $('#systemStatus').text('جاري تحديد الموقع...');
+        $('#systemStatus').text('Détermination de la position...');
         
         navigator.geolocation.getCurrentPosition(
             function(position) {
@@ -1730,17 +1726,17 @@
                 
                 map.setView([lat, lng], 16);
                 
-                // تحديث حقول الإحداثيات
+                // Mise à jour des champs de coordonnées
                 $('#coordLatWGS').val(lat.toFixed(6));
                 $('#coordLonWGS').val(lng.toFixed(6));
                 updateMarocFromWGS();
                 
-                // إزالة العلامة السابقة إذا كانت موجودة
+                // Suppression du marqueur précédent s'il existe
                 if (myLocationMarker) {
                     map.removeLayer(myLocationMarker);
                 }
                 
-                // إنشاء أيقونة موقعي
+                // Création de l'icône de ma position
                 const myLocationIcon = L.divIcon({
                     className: 'my-location-icon',
                     html: '',
@@ -1748,7 +1744,7 @@
                     iconAnchor: [10, 10]
                 });
                 
-                // إضافة علامة موقعي
+                // Ajout du marqueur de ma position
                 myLocationMarker = L.marker([lat, lng], {
                     icon: myLocationIcon,
                     zIndexOffset: 1000
@@ -1756,28 +1752,28 @@
                 
                 myLocationMarker.bindPopup(`
                     <div class="popup-header">
-                        <span class="popup-title">موقعي الحالي</span>
+                        <span class="popup-title">Ma position actuelle</span>
                     </div>
                     <div class="popup-content">
                         <div class="popup-row">
-                            <span class="popup-label">خط العرض:</span>
+                            <span class="popup-label">Latitude:</span>
                             <span class="popup-value">${lat.toFixed(6)}°</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">خط الطول:</span>
+                            <span class="popup-label">Longitude:</span>
                             <span class="popup-value">${lng.toFixed(6)}°</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">الدقة:</span>
-                            <span class="popup-value">±${position.coords.accuracy.toFixed(1)} م</span>
+                            <span class="popup-label">Précision:</span>
+                            <span class="popup-value">±${position.coords.accuracy.toFixed(1)} m</span>
                         </div>
                     </div>
                 `).openPopup();
                 
-                $('#systemStatus').text('تم تحديد الموقع');
-                showNotification('تم تحديد موقعك الحالي', 'success');
+                $('#systemStatus').text('Position déterminée');
+                showNotification('Votre position actuelle a été déterminée', 'success');
                 
-                // تتبع الموقع
+                // Suivi de la position
                 if (geolocationWatchId) {
                     navigator.geolocation.clearWatch(geolocationWatchId);
                 }
@@ -1791,7 +1787,7 @@
                         }
                     },
                     function(error) {
-                        console.error('خطأ في تتبع الموقع:', error);
+                        console.error('Erreur de suivi de position:', error);
                     },
                     {
                         enableHighAccuracy: true,
@@ -1801,20 +1797,20 @@
                 );
             },
             function(error) {
-                let message = 'حدث خطأ في تحديد الموقع';
+                let message = 'Une erreur est survenue lors de la détermination de la position';
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        message = 'تم رفض الإذن لتحديد الموقع';
+                        message = 'Autorisation de géolocalisation refusée';
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        message = 'معلومات الموقع غير متوفرة';
+                        message = 'Informations de position non disponibles';
                         break;
                     case error.TIMEOUT:
-                        message = 'انتهت مهلة طلب الموقع';
+                        message = 'Délai de demande de position expiré';
                         break;
                 }
                 
-                $('#systemStatus').text('خطأ في الموقع');
+                $('#systemStatus').text('Erreur de position');
                 showNotification(message, 'error');
             },
             {
@@ -1825,7 +1821,7 @@
         );
     }
     
-    // عرض نتائج القياس كجدول
+    // Affichage des résultats de mesure sous forme de tableau
     function showMeasurementResults(layer, type) {
         const tbody = $('#measurementTableBody');
         tbody.empty();
@@ -1836,9 +1832,9 @@
             
             tbody.append(`
                 <tr>
-                    <td>الطول</td>
-                    <td>${length.toFixed(2)} م</td>
-                    <td>${lengthKm} كم</td>
+                    <td>Longueur</td>
+                    <td>${length.toFixed(2)} m</td>
+                    <td>${lengthKm} km</td>
                 </tr>
             `);
             
@@ -1850,14 +1846,14 @@
             
             tbody.append(`
                 <tr>
-                    <td>المساحة</td>
-                    <td>${area.toFixed(2)} م²</td>
-                    <td>${areaHectares} هكتار</td>
+                    <td>Superficie</td>
+                    <td>${area.toFixed(2)} m²</td>
+                    <td>${areaHectares} hectare</td>
                 </tr>
                 <tr>
-                    <td>المحيط</td>
-                    <td>${perimeter.toFixed(2)} م</td>
-                    <td>${perimeterKm} كم</td>
+                    <td>Périmètre</td>
+                    <td>${perimeter.toFixed(2)} m</td>
+                    <td>${perimeterKm} km</td>
                 </tr>
             `);
         }
@@ -1865,53 +1861,53 @@
         $('#measurementSection').show();
     }
     
-    // مسح جميع العناصر
+    // Effacement de tous les éléments
     function clearAllElements() {
         if (elements.length > 0) {
-            if (confirm(`هل تريد مسح جميع العناصر (${elements.length} عنصر)?`)) {
+            if (confirm(`Voulez-vous effacer tous les éléments (${elements.length} élément(s))?`)) {
                 drawnItems.clearLayers();
                 elements = [];
                 elementCounter = 1;
                 updateElementsTable();
                 updateDrawnCount();
                 $('#measurementSection').hide();
-                showNotification('تم مسح جميع العناصر', 'info');
+                showNotification('Tous les éléments ont été effacés', 'info');
             }
         } else {
-            showNotification('لا توجد عناصر للمسح', 'info');
+            showNotification('Aucun élément à effacer', 'info');
         }
     }
     
-    // تنزيل جميع العناصر
+    // Téléchargement de tous les éléments
     function downloadAllElements() {
         if (elements.length === 0) {
-            showNotification('لا توجد عناصر للتنزيل', 'error');
+            showNotification('Aucun élément à télécharger', 'error');
             return;
         }
         
         const zip = new JSZip();
         const timestamp = new Date().getTime();
         
-        // 1. إنشاء ملف CSV
-        let csv = 'الاسم,النوع,الموقع,WGS84,المغرب (متر),المساحة/الطول,التاريخ\n';
+        // 1. Création du fichier CSV
+        let csv = 'Nom,Type,Emplacement,WGS84,Maroc (mètres),Superficie/Longueur,Date\n';
         
         elements.forEach(element => {
             let measurement = '';
             
             if (element.type === 'point') {
-                measurement = 'نقطة';
+                measurement = 'Point';
             } else if (element.type === 'line') {
-                measurement = `${element.measurements.length.toFixed(2)} م (${element.measurements.lengthKm} كم)`;
+                measurement = `${element.measurements.length.toFixed(2)} m (${element.measurements.lengthKm} km)`;
             } else if (element.type === 'polygon') {
-                measurement = `${element.measurements.area.toFixed(2)} م² (${element.measurements.areaHectares} هكتار)`;
+                measurement = `${element.measurements.area.toFixed(2)} m² (${element.measurements.areaHectares} hectare)`;
             }
             
             csv += `"${element.name}","${getTypeName(element.type)}","${element.location}","${element.coordinates.wgs84}","${element.coordinates.maroc}","${measurement}","${element.createdAt}"\n`;
         });
         
-        zip.file(`جدول_العناصر_${timestamp}.csv`, '\uFEFF' + csv);
+        zip.file(`Tableau_Éléments_${timestamp}.csv`, '\uFEFF' + csv);
         
-        // 2. إنشاء ملفات GeoJSON فردية
+        // 2. Création des fichiers GeoJSON individuels
         elements.forEach((element, index) => {
             const featureCollection = {
                 type: "FeatureCollection",
@@ -1937,10 +1933,10 @@
             }
             
             const data = JSON.stringify(featureCollection, null, 2);
-            zip.file(`عنصر_${index + 1}_${element.name.replace(/[^\w\u0600-\u06FF]/g, '_')}.geojson`, data);
+            zip.file(`Élément_${index + 1}_${element.name.replace(/[^\w\u0600-\u06FF]/g, '_')}.geojson`, data);
         });
         
-        // 3. إنشاء ملف KML
+        // 3. Création du fichier KML
         const geojson = drawnItems.toGeoJSON();
         
         geojson.features.forEach((feature, index) => {
@@ -1953,48 +1949,48 @@
                 feature.properties.createdAt = element.createdAt;
                 
                 if (element.type === 'line') {
-                    feature.properties.length = `${element.measurements.length.toFixed(2)} م`;
-                    feature.properties.lengthKm = element.measurements.lengthKm + ' كم';
+                    feature.properties.length = `${element.measurements.length.toFixed(2)} m`;
+                    feature.properties.lengthKm = element.measurements.lengthKm + ' km';
                 } else if (element.type === 'polygon') {
-                    feature.properties.area = `${element.measurements.area.toFixed(2)} م²`;
-                    feature.properties.areaHectares = element.measurements.areaHectares + ' هكتار';
-                    feature.properties.perimeter = `${element.measurements.perimeter.toFixed(2)} م`;
-                    feature.properties.perimeterKm = element.measurements.perimeterKm + ' كم';
+                    feature.properties.area = `${element.measurements.area.toFixed(2)} m²`;
+                    feature.properties.areaHectares = element.measurements.areaHectares + ' hectare';
+                    feature.properties.perimeter = `${element.measurements.perimeter.toFixed(2)} m`;
+                    feature.properties.perimeterKm = element.measurements.perimeterKm + ' km';
                 }
             }
         });
         
         const kml = toKML(geojson);
-        zip.file(`جميع_العناصر_${timestamp}.kml`, kml);
+        zip.file(`Tous_Éléments_${timestamp}.kml`, kml);
         
-        // إنشاء ملف ZIP وتنزيله
+        // Création du fichier ZIP et téléchargement
         zip.generateAsync({type: "blob"})
         .then(function(content) {
-            saveAs(content, `تصدير_العناصر_${timestamp}.zip`);
-            showNotification(`تم تنزيل ${elements.length} عنصر في ملف ZIP`, 'success');
+            saveAs(content, `Export_Éléments_${timestamp}.zip`);
+            showNotification(`${elements.length} élément(s) téléchargé(s) dans un fichier ZIP`, 'success');
         });
     }
     
-    // تحويل GeoJSON إلى KML
+    // Conversion de GeoJSON en KML
     function toKML(geojson) {
         let kml = `<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
 <Document>
-<name>تصدير من نظام القياس الجغرافي</name>
-<description>تم التصدير في ${new Date().toLocaleString('ar')}</description>
+<name>Export du système de mesure géographique</name>
+<description>Exporté le ${new Date().toLocaleString('fr')}</description>
 <open>1</open>`;
         
         geojson.features.forEach((feature, index) => {
             const props = feature.properties || {};
-            const name = props.name || `عنصر ${index + 1}`;
+            const name = props.name || `Élément ${index + 1}`;
             const description = `
-                النوع: ${props.type || feature.geometry.type}
-                الموقع: ${props.location || 'غير محدد'}
-                ${props.length ? `الطول: ${props.length}\n` : ''}
-                ${props.lengthKm ? `الطول: ${props.lengthKm}\n` : ''}
-                ${props.area ? `المساحة: ${props.area}\n` : ''}
-                ${props.areaHectares ? `المساحة: ${props.areaHectares}\n` : ''}
-                التاريخ: ${props.createdAt || new Date().toLocaleString('ar')}
+                Type: ${props.type || feature.geometry.type}
+                Emplacement: ${props.location || 'Non spécifié'}
+                ${props.length ? `Longueur: ${props.length}\n` : ''}
+                ${props.lengthKm ? `Longueur: ${props.lengthKm}\n` : ''}
+                ${props.area ? `Superficie: ${props.area}\n` : ''}
+                ${props.areaHectares ? `Superficie: ${props.areaHectares}\n` : ''}
+                Date: ${props.createdAt || new Date().toLocaleString('fr')}
             `.trim();
             
             kml += `<Placemark>
@@ -2036,7 +2032,7 @@
         return kml;
     }
     
-    // دوال المساعدة
+    // Fonctions utilitaires
     function calculateLength(line) {
         const latlngs = line.getLatLngs();
         let totalLength = 0;
@@ -2082,9 +2078,9 @@
         
         try {
             const coords = proj4('EPSG:4326', 'EPSG:26191', [latlng.lng, latlng.lat]);
-            maroc = `${coords[0].toFixed(2)} م, ${coords[1].toFixed(2)} م`;
+            maroc = `${coords[0].toFixed(2)} m, ${coords[1].toFixed(2)} m`;
         } catch (error) {
-            console.error('خطأ في التحويل:', error);
+            console.error('Erreur de conversion:', error);
         }
         
         return {
@@ -2095,26 +2091,18 @@
     
     function getTypeName(type) {
         const typeNames = {
-            'point': 'نقطة',
-            'line': 'خط',
-            'polygon': 'مضلع'
+            'point': 'Point',
+            'line': 'Ligne',
+            'polygon': 'Polygone'
         };
         return typeNames[type] || type;
     }
     
     function updateSystemInfo() {
-        $('#systemStatus').text('جاهز');
+        $('#systemStatus').text('Prêt');
     }
     
-    function updatePanelButton() {
-        const isPanelVisible = $('#infoPanel').hasClass('show');
-        $('#togglePanelBtn').html(isPanelVisible ? 
-            '<i class="fas fa-chevron-right"></i>' : 
-            '<i class="fas fa-info-circle"></i>'
-        );
-    }
-    
-    // عرض الإشعارات
+    // Affichage des notifications
     function showNotification(message, type = 'info') {
         const notification = $(`
             <div class="notification ${type}">
@@ -2122,7 +2110,7 @@
                     <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
                 </div>
                 <div class="notification-content">
-                    <div class="notification-title">${type === 'success' ? 'نجاح' : type === 'error' ? 'خطأ' : 'معلومة'}</div>
+                    <div class="notification-title">${type === 'success' ? 'Succès' : type === 'error' ? 'Erreur' : 'Information'}</div>
                     <div>${message}</div>
                 </div>
             </div>
@@ -2135,16 +2123,16 @@
         }, 3000);
     }
     
-    // دوال عامة للاستخدام في النوافذ المنبثقة
+    // Fonctions globales pour utilisation dans les fenêtres contextuelles
     window.renameElement = function(elementId) {
         const element = elements.find(e => e.id === elementId);
         if (element) {
-            const newName = prompt('أدخل الاسم الجديد:', element.name);
+            const newName = prompt('Entrez le nouveau nom:', element.name);
             if (newName !== null && newName.trim() !== '') {
                 element.name = newName.trim();
                 updateElementsTable();
                 updateElementPopup(element.layer);
-                showNotification('تم تحديث اسم العنصر', 'success');
+                showNotification('Nom de l\'élément mis à jour', 'success');
             }
         }
     };
@@ -2179,14 +2167,14 @@
             const blob = new Blob([data], { type: 'application/json' });
             saveAs(blob, `${element.name}_${Date.now()}.geojson`);
             
-            showNotification(`تم تنزيل العنصر: ${element.name}`, 'success');
+            showNotification(`Élément téléchargé: ${element.name}`, 'success');
         }
     };
     
     window.viewOnMap = function(elementId) {
         const element = elements.find(e => e.id === elementId);
         if (element) {
-            // التركيز على الخريطة
+            // Centrer sur la carte
             if (element.type === 'point') {
                 const latlng = element.layer.getLatLng();
                 map.setView(latlng, 16);
@@ -2197,13 +2185,11 @@
                 element.layer.openPopup();
             }
             
-            showNotification(`تم عرض العنصر: ${element.name} على الخريطة`, 'success');
+            showNotification(`Élément affiché: ${element.name} sur la carte`, 'success');
         }
     };
     
     window.downloadAllElements = downloadAllElements;
     </script>
-    
-
-    
+</body>
 </html>
