@@ -150,6 +150,13 @@
         
         .panel-content {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .panel-scrollable {
+            flex: 1;
             overflow-y: auto;
             padding: 15px;
         }
@@ -213,68 +220,55 @@
             margin-bottom: 0;
         }
         
-        .measurement-results {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .measurement-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .measurement-value {
-            font-size: 24px;
-            font-weight: 700;
-            text-align: center;
-            margin: 5px 0;
-        }
-        
-        .measurement-unit {
-            font-size: 12px;
-            opacity: 0.9;
-            text-align: center;
-        }
-        
-        .measurement-details {
-            display: flex;
-            justify-content: space-between;
+        /* نتائج القياس كجدول */
+        .measurement-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
-        .detail-item {
+        .measurement-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px;
             text-align: center;
-        }
-        
-        .detail-value {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 11px;
+            white-space: nowrap;
         }
         
-        .detail-label {
-            font-size: 10px;
-            opacity: 0.8;
+        .measurement-table td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
         }
         
-        .tools-buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+        .measurement-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* أدوات التحكم الأفقية */
+        .horizontal-tools {
+            display: flex;
             gap: 8px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
-        .tool-btn {
+        .horizontal-tool-btn {
+            flex: 1;
+            min-width: 80px;
             background: white;
             border: 2px solid #ddd;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -283,20 +277,26 @@
             transition: all 0.3s ease;
         }
         
-        .tool-btn:hover {
+        .horizontal-tool-btn:hover {
             border-color: var(--primary-color);
             transform: translateY(-2px);
         }
         
-        .tool-btn.active {
+        .horizontal-tool-btn.active {
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
         }
         
-        .tool-btn i {
-            font-size: 20px;
-            margin-bottom: 8px;
+        .horizontal-tool-btn i {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .horizontal-tool-btn span {
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
         }
         
         .location-btn {
@@ -339,11 +339,20 @@
             color: var(--primary-color);
         }
         
+        /* جدول البيانات مع scrolling */
+        .data-table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
             font-size: 11px;
+            min-width: 500px;
         }
         
         .data-table th {
@@ -354,6 +363,9 @@
             color: var(--dark-color);
             font-weight: 600;
             white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
         
         .data-table td {
@@ -371,7 +383,6 @@
             display: flex;
             gap: 5px;
             justify-content: flex-start;
-            margin-top: 5px;
         }
         
         .table-btn {
@@ -514,6 +525,8 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            width: 100%;
+            justify-content: center;
         }
         
         .download-system-btn:hover {
@@ -542,25 +555,28 @@
             border-radius: 50%;
         }
         
-        /* زر عرض لوحة التحكم للهواتف */
-        .mobile-controls-btn {
+        /* زر موقعي على الخريطة */
+        .my-location-map-btn {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
+            bottom: 100px;
+            right: 15px;
+            background: white;
+            width: 45px;
+            height: 45px;
             border-radius: 8px;
-            padding: 10px 15px;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            z-index: 1000;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        .my-location-map-btn:hover {
+            background: var(--primary-color);
+            color: white;
         }
         
         .notification {
@@ -616,38 +632,6 @@
             color: var(--dark-color);
         }
         
-        .search-box {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-            padding: 8px;
-            z-index: 1000;
-            width: 300px;
-            display: flex;
-            gap: 8px;
-        }
-        
-        .search-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        
-        .search-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        
         /* تحسينات لشريط أدوات الرسم */
         .leaflet-draw {
             background: white;
@@ -679,12 +663,7 @@
             top: 0;
         }
         
-        /* إزالة أزرار الأدوات الجانبية */
-        .map-tools {
-            display: none;
-        }
-        
-        /* مكونات معلومات النظام المحسنة */
+        /* مكونات معلومات النظام */
         .system-info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -739,6 +718,7 @@
             
             .data-table {
                 font-size: 10px;
+                min-width: 400px;
             }
             
             .table-actions {
@@ -751,17 +731,12 @@
                 font-size: 9px;
             }
             
-            .search-box {
-                width: calc(100% - 100px);
-                top: 70px;
-                left: 15px;
-            }
-            
-            .mobile-controls-btn {
-                display: flex;
-                top: 15px;
-                left: 15px;
-                z-index: 1001;
+            .my-location-map-btn {
+                bottom: 80px;
+                right: 10px;
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
             }
             
             .system-info-grid {
@@ -773,43 +748,31 @@
                 margin-bottom: 15px;
             }
             
-            .panel-content {
+            .panel-scrollable {
                 padding: 10px;
             }
             
-            /* إعادة ترتيب الأقسام للهواتف */
-            .section-order-mobile {
-                display: flex;
-                flex-direction: column;
+            .horizontal-tools {
+                flex-wrap: wrap;
             }
             
-            /* إخفاء بعض الأقسام تلقائياً */
-            .coordinate-inputs,
-            .measurement-results,
-            .tools-buttons {
-                display: none;
+            .horizontal-tool-btn {
+                min-width: 70px;
+                padding: 8px;
             }
             
-            /* إظهار فقط معلومات النظام وجدول البيانات */
-            .system-info-section,
-            .data-table-section {
-                display: block;
+            .horizontal-tool-btn i {
+                font-size: 16px;
             }
             
-            .coordinate-inputs.show-mobile,
-            .measurement-results.show-mobile,
-            .tools-buttons.show-mobile {
-                display: block;
+            .horizontal-tool-btn span {
+                font-size: 10px;
             }
         }
         
         @media (min-width: 769px) {
             .toggle-panel-btn {
                 display: flex;
-            }
-            
-            .mobile-controls-btn {
-                display: none;
             }
         }
         
@@ -837,22 +800,13 @@
                     <i class="fas fa-map-marked-alt"></i>
                 </div>
                 <div class="logo-text">
-                    <h1>نظام القياس والمساحة الجغرافي</h1>
-                    <p>Google Satellite | قياس دقيق للمساحات والمسافات</p>
+                   <h1>Création et téléchargement de données SIG</h1>
+
+                    <p>Google Satellite | Mesures précises des superficies et distances</p>
                 </div>
             </div>
             
-            <!-- اختيار نظام الإسقاط -->
-            <div class="projection-selector">
-                <div class="projection-btn active" data-projection="wgs84">
-                    <i class="fas fa-globe"></i>
-                    <span>WGS84 (درجات)</span>
-                </div>
-                <div class="projection-btn" data-projection="maroc">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span>المغرب (متر)</span>
-                </div>
-            </div>
+            
         </div>
         
         <!-- المحتوى الرئيسي -->
@@ -860,20 +814,12 @@
             <!-- الخريطة -->
             <div id="map"></div>
             
-            <!-- زر عرض لوحة التحكم للهواتف -->
-            <button class="mobile-controls-btn" id="mobileControlsBtn">
-                <i class="fas fa-bars"></i>
-                لوحة التحكم
+            <!-- زر موقعي على الخريطة -->
+            <button class="my-location-map-btn" id="myLocationMapBtn" title="موقعي">
+                <i class="fas fa-location-crosshairs"></i>
             </button>
             
-            <!-- شريط البحث -->
-            <div class="search-box">
-                <input type="text" class="search-input" id="searchInput" placeholder="أدخل إحداثيات أو اسم مكان...">
-                <button class="search-btn" id="searchBtn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-          
+        
             
             <!-- لوحة المعلومات -->
             <div class="info-panel" id="infoPanel">
@@ -884,126 +830,161 @@
                     </button>
                 </div>
                 
-                <div class="panel-content section-order-mobile">
-                    <!-- معلومات النظام -->
-                    <div class="section system-info-section">
-                        <div class="section-title">
-                            <i class="fas fa-info-circle"></i>
-                            معلومات النظام
-                        </div>
-                        <div class="system-info-grid">
-                            <div class="system-info-item">
-                                <div class="system-info-value" id="drawnCount">0</div>
-                                <div class="system-info-label">العناصر المرسومة</div>
+                <div class="panel-content">
+                    <!-- المحتوى القابل للتمرير -->
+                    <div class="panel-scrollable">
+                        <!-- إدخال الإحداثيات -->
+                        <div class="section">
+                            <div class="section-title">
+                                <i class="fas fa-crosshairs"></i>
+                                إدخال الإحداثيات
                             </div>
-                            <div class="system-info-item">
-                                <div class="system-info-value" id="systemStatus" style="color: var(--secondary-color);">جاهز</div>
-                                <div class="system-info-label">الحالة</div>
+                            <div class="coordinate-inputs">
+                                <div class="coord-row">
+                                    <div class="coord-field">
+                                        <label>X (متر - Maroc Lambert)</label>
+                                        <input type="text" class="coord-input" id="coordXMaroc" placeholder="مثال: 500000">
+                                    </div>
+                                    <div class="coord-field">
+                                        <label>Y (متر - Maroc Lambert)</label>
+                                        <input type="text" class="coord-input" id="coordYMaroc" placeholder="مثال: 3500000">
+                                    </div>
+                                </div>
+                                <div class="coord-row">
+                                    <div class="coord-field">
+                                        <label>خط العرض (درجات - WGS84)</label>
+                                        <input type="text" class="coord-input" id="coordLatWGS" placeholder="مثال: 31.63">
+                                    </div>
+                                    <div class="coord-field">
+                                        <label>خط الطول (درجات - WGS84)</label>
+                                        <input type="text" class="coord-input" id="coordLonWGS" placeholder="مثال: -7.99">
+                                    </div>
+                                </div>
+                                <button class="location-btn" id="gotoCoordsBtn">
+                                    <i class="fas fa-location-arrow"></i>
+                                    انتقال إلى الموقع
+                                </button>
                             </div>
                         </div>
-                        <div class="download-btn-container">
-                            <button class="download-system-btn" onclick="downloadAllElements()">
-                                <i class="fas fa-download"></i>
-                                تنزيل جميع العناصر
-                            </button>
+                        
+                        <!-- معلومات النظام -->
+                        <div class="section">
+                            <div class="section-title">
+                                <i class="fas fa-info-circle"></i>
+                                معلومات النظام
+                            </div>
+                            <div class="system-info-grid">
+                                <div class="system-info-item">
+                                    <div class="system-info-value" id="drawnCount">0</div>
+                                    <div class="system-info-label">العناصر المرسومة</div>
+                                </div>
+                                <div class="system-info-item">
+                                    <div class="system-info-value" id="systemStatus" style="color: var(--secondary-color);">جاهز</div>
+                                    <div class="system-info-label">الحالة</div>
+                                </div>
+                            </div>
                         </div>
+                        
+                        <!-- نتائج القياس -->
+                        <div class="section" id="measurementSection" style="display: none;">
+                            <div class="section-title">
+                                <i class="fas fa-calculator"></i>
+                                نتائج القياس
+                            </div>
+                            <table class="measurement-table" id="measurementTable">
+                                <thead>
+                                    <tr>
+                                        <th>النوع</th>
+                                          <th>القيمة المحولة</th>
+                                        <th>القيمة الأساسية</th>
+                                      
+                                    </tr>
+                                </thead>
+                                <tbody id="measurementTableBody">
+                                    <!-- البيانات تضاف هنا -->
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                         <!-- أدوات التحكم -->
+                        <div class="section">
+                            <div class="section-title">
+                                <i class="fas fa-tools"></i>
+                                أدوات التحكم
+                            </div>
+                            <div class="horizontal-tools">
+                                <button class="horizontal-tool-btn" data-action="export">
+                                    <i class="fas fa-download"></i>
+                                    <span>تنزيل الكل</span>
+                                </button>
+                                <button class="horizontal-tool-btn" data-action="clear">
+                                    <i class="fas fa-trash-alt"></i>
+                                    <span>مسح الكل</span>
+                                </button>
+                                <button class="horizontal-tool-btn" data-action="mylocation">
+                                    <i class="fas fa-location-crosshairs"></i>
+                                    <span>موقعي</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- جدول البيانات -->
+                        <div class="section">
+                            <div class="section-title">
+                                <i class="fas fa-database"></i>
+                                جدول البيانات
+                            </div>
+                            <div class="data-table-container">
+                                <table class="data-table" id="elementsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>الاسم</th>
+                                            <th>النوع</th>
+                                            <th>الإحداثيات</th>
+                                            <th>المساحة/الطول</th>
+                                            <th>الإجراءات</th>
+                                            <th>التاريخ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="elementsTableBody">
+                                        <!-- البيانات تضاف هنا -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                       
                     </div>
                     
-                    <!-- جدول العناصر المرسومة -->
-                    <div class="section data-table-section" id="tableSection" style="display: none;">
-                        <div class="section-title">
-                            <i class="fas fa-database"></i>
-                            جدول البيانات
-                            <button class="popup-btn secondary" style="margin-right: auto; padding: 4px 8px; font-size: 10px;" onclick="hideTable()">
-                                إخفاء
-                            </button>
-                        </div>
-                        <table class="data-table" id="elementsTable">
-                            <thead>
-                                <tr>
-                                    <th>الاسم</th>
-                                    <th>النوع</th>
-                                    <th>الإحداثيات</th>
-                                    <th>المساحة/الطول</th>
-                                    <th>الإجراءات</th>
-                                    <th>المصدر</th>
-                                    <th>التاريخ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="elementsTableBody">
-                                <!-- البيانات تضاف هنا -->
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- إدخال الإحداثيات -->
-                    <div class="section coordinate-inputs show-mobile">
-                        <div class="section-title">
-                            <i class="fas fa-crosshairs"></i>
-                            إدخال الإحداثيات
-                        </div>
-                        <div class="coord-row">
-                            <div class="coord-field">
-                                <label>خط العرض (درجات - WGS84)</label>
-                                <input type="text" class="coord-input" id="coordLatWGS" placeholder="مثال: 31.63">
-                            </div>
-                            <div class="coord-field">
-                                <label>خط الطول (درجات - WGS84)</label>
-                                <input type="text" class="coord-input" id="coordLonWGS" placeholder="مثال: -7.99">
-                            </div>
-                        </div>
-                        <button class="location-btn" id="gotoCoordsBtn">
-                            <i class="fas fa-location-arrow"></i>
-                            انتقال إلى الموقع
+
+
+
+                    <!-- زر تنزيل جميع العناصر (ثابت في الأسفل) -->
+                    <div class="section" style="padding: 15px; border-top: 1px solid #eee; background: #f8f9fa;">
+                        <button class="download-system-btn" onclick="downloadAllElements()">
+                            <i class="fas fa-download"></i>
+                            تنزيل جميع العناصر
                         </button>
                     </div>
-                    
-                    <!-- نتائج القياس -->
-                    <div class="section measurement-results show-mobile" id="measurementResults" style="display: none;">
-                        <div class="section-title">
-                            <i class="fas fa-calculator"></i>
-                            نتائج القياس
-                        </div>
-                        <div class="measurement-title" id="measurementType">قياس المساحة</div>
-                        <div class="measurement-value" id="measurementValue">0.00</div>
-                        <div class="measurement-unit" id="measurementUnit">متر مربع</div>
-                        <div class="measurement-details">
-                            <div class="detail-item">
-                                <div class="detail-value" id="detailValue1">0.00</div>
-                                <div class="detail-label" id="detailLabel1">هكتار</div>
-                            </div>
-                            <div class="detail-item">
-                                <div class="detail-value" id="detailValue2">0.00</div>
-                                <div class="detail-label" id="detailLabel2">كيلومتر</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- الأدوات -->
-                    <div class="section tools-buttons show-mobile">
-                        <div class="section-title">
-                            <i class="fas fa-tools"></i>
-                            أدوات التحكم
-                        </div>
-                        <div class="tools-buttons-grid">
-                            <button class="tool-btn" data-action="mylocation">
-                                <i class="fas fa-location-crosshairs"></i>
-                                <span>موقعي</span>
-                            </button>
-                            <button class="tool-btn" data-action="export">
-                                <i class="fas fa-download"></i>
-                                <span>تنزيل الكل</span>
-                            </button>
-                            <button class="tool-btn" data-action="clear">
-                                <i class="fas fa-trash-alt"></i>
-                                <span>مسح الكل</span>
-                            </button>
-                            <button class="tool-btn" data-action="table">
-                                <i class="fas fa-table"></i>
-                                <span>جدول البيانات</span>
-                            </button>
-                        </div>
-                    </div>
+
+
+<!-- توقيع الموقع مع واتساب -->
+<div class="footer-signature" style="text-align: center; padding: 15px; font-family: Arial, sans-serif; font-size: 14px; color: #555;">
+    تم إنجاز هذا الموقع من طرف 
+    <span class="signature-name" style="font-weight: bold;">Jilit Mostafa</span>
+    |
+    <a href="mailto:jilitsig@gmail.com" title="البريد الإلكتروني" style="text-decoration: none; color: #007bff; margin: 0 5px;">
+        <i class="fas fa-envelope"></i> jilitsig@gmail.com
+    </a>
+    |
+    <a href="https://wa.me/212600000000" target="_blank" title="واتساب" style="text-decoration: none; color: #25D366; margin: 0 5px;">
+        <i class="fab fa-whatsapp"></i> +212 600 000 000
+    </a>
+    <div class="version" style="margin-top: 5px; font-size: 12px; color: #999;">
+        الإصدار 1.0 | © 2024 جميع الحقوق محفوظة
+    </div>
+</div>
                 </div>
             </div>
         </div>
@@ -1027,7 +1008,6 @@
     let elementCounter = 1;
     let myLocationMarker = null;
     let geolocationWatchId = null;
-    let userEmail = 'jilitsig@gmail.com'; // البريد الإلكتروني الافتراضي
     
     // تعريف أنظمة إسقاط المغرب
     proj4.defs("EPSG:26191", "+proj=lcc +lat_1=33.21666666666667 +lat_2=35 +lat_0=33.21666666666667 +lon_0=-5.4 +x_0=500000 +y_0=300000 +ellps=intl +units=m +no_defs");
@@ -1066,26 +1046,8 @@
         initMap();
         setupEventListeners();
         updateElementsTable();
-        checkMobileView();
         showNotification('نظام القياس الجغرافي جاهز للاستخدام', 'success');
-        
-        // طلب البريد الإلكتروني عند البدء
-        setTimeout(() => {
-            const email = prompt('الرجاء إدخال بريدك الإلكتروني:', userEmail);
-            if (email && email.includes('@')) {
-                userEmail = email;
-                showNotification(`تم تعيين المصدر: ${userEmail}`, 'success');
-            }
-        }, 1000);
     });
-    
-    // التحقق من عرض الهاتف
-    function checkMobileView() {
-        if (window.innerWidth <= 768) {
-            $('.coordinate-inputs, .measurement-results, .tools-buttons').addClass('show-mobile');
-            $('#tableSection').hide();
-        }
-    }
     
     // تهيئة الخريطة
     function initMap() {
@@ -1129,9 +1091,6 @@
         setTimeout(() => {
             map.invalidateSize();
         }, 100);
-        
-        // إعادة ترتيب عند تغيير حجم النافذة
-        window.addEventListener('resize', checkMobileView);
     }
     
     // تفعيل أدوات الرسم الدائمة
@@ -1232,27 +1191,21 @@
             
             // الحصول على الموقع الجغرافي لتحديد الاسم
             const location = getLocationName(layer);
-            const defaultName = `${typeName} ${elementCounter} ${location}`;
             
-            // طلب اسم للعنصر
-            const elementName = prompt(`أدخل اسماً للـ${typeName} (${location}):`, defaultName);
+            // إنشاء اسم تلقائي للعنصر
+            const elementName = `${typeName} ${elementCounter} ${location}`;
             
-            if (elementName !== null && elementName.trim() !== '') {
-                // إضافة العنصر
-                addElement(layer, elementName.trim(), elementType, type);
-                elementCounter++;
-                
-                // إضافة النافذة المنبثقة
-                addPopupToElement(layer, elementName.trim(), elementType);
-                
-                // عرض نتائج القياس
-                showMeasurementResults(layer, elementType);
-                
-                showNotification(`تم إنشاء ${typeName}: ${elementName.trim()}`, 'success');
-            } else {
-                // إزالة الطبقة إذا تم إلغاء الاسم
-                layer.remove();
-            }
+            // إضافة العنصر تلقائياً بدون طلب الاسم
+            addElement(layer, elementName, elementType, type);
+            elementCounter++;
+            
+            // إضافة النافذة المنبثقة
+            addPopupToElement(layer, elementName, elementType);
+            
+            // عرض نتائج القياس
+            showMeasurementResults(layer, elementType);
+            
+            showNotification(`تم إنشاء ${typeName}: ${elementName}`, 'success');
         });
         
         // عند تحرير شكل
@@ -1300,21 +1253,12 @@
             updatePanelButton();
         });
         
-        // زر عرض لوحة التحكم للهواتف
-        $('#mobileControlsBtn').click(function() {
-            $('#infoPanel').toggleClass('show');
-            if ($('#infoPanel').hasClass('show')) {
-                $(this).html('<i class="fas fa-times"></i> إغلاق');
-            } else {
-                $(this).html('<i class="fas fa-bars"></i> لوحة التحكم');
-            }
-        });
         
         // زر الانتقال إلى الإحداثيات
         $('#gotoCoordsBtn').click(goToCoordinates);
         
-        // أزرار الأدوات
-        $('.tool-btn').click(function() {
+        // أزرار الأدوات الأفقية
+        $('.horizontal-tool-btn').click(function() {
             const action = $(this).data('action');
             
             switch(action) {
@@ -1327,17 +1271,6 @@
                 case 'clear':
                     clearAllElements();
                     break;
-                case 'table':
-                    showTable();
-                    break;
-            }
-        });
-        
-        // زر البحث
-        $('#searchBtn').click(searchLocation);
-        $('#searchInput').keypress(function(e) {
-            if (e.which === 13) {
-                searchLocation();
             }
         });
         
@@ -1411,7 +1344,6 @@
             layer: layer,
             location: getLocationName(layer),
             createdAt: new Date().toLocaleString('ar'),
-            source: userEmail, // إضافة حقل المصدر
             measurements: getMeasurements(layer, type),
             coordinates: getElementCoordinates(layer, type)
         };
@@ -1424,11 +1356,6 @@
         
         updateElementsTable();
         updateDrawnCount();
-        
-        // إذا كان جدول البيانات مخفي، إظهار زر جدول البيانات
-        if ($('#tableSection').is(':hidden') && elements.length > 0) {
-            // يمكن إضافة زر هنا إذا أردت
-        }
     }
     
     // الحصول على إحداثيات العنصر
@@ -1530,10 +1457,6 @@
                             <span class="popup-value">${coords.maroc}</span>
                         </div>
                         <div class="popup-row">
-                            <span class="popup-label">المصدر:</span>
-                            <span class="popup-value">${element.source}</span>
-                        </div>
-                        <div class="popup-row">
                             <span class="popup-label">التاريخ:</span>
                             <span class="popup-value">${element.createdAt}</span>
                         </div>
@@ -1569,10 +1492,6 @@
                         <div class="popup-row">
                             <span class="popup-label">الطول:</span>
                             <span class="popup-value">${lengthKm} كم</span>
-                        </div>
-                        <div class="popup-row">
-                            <span class="popup-label">المصدر:</span>
-                            <span class="popup-value">${element.source}</span>
                         </div>
                         <div class="popup-row">
                             <span class="popup-label">التاريخ:</span>
@@ -1620,10 +1539,6 @@
                         <div class="popup-row">
                             <span class="popup-label">المحيط:</span>
                             <span class="popup-value">${perimeterKm} كم</span>
-                        </div>
-                        <div class="popup-row">
-                            <span class="popup-label">المصدر:</span>
-                            <span class="popup-value">${element.source}</span>
                         </div>
                         <div class="popup-row">
                             <span class="popup-label">التاريخ:</span>
@@ -1675,21 +1590,36 @@
                 measurementText = 'نقطة';
                 coordinateText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>WGS84:</strong> ${element.coordinates.wgs84}
+                        <strong>WGS84:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>المغرب:</strong> ${element.coordinates.maroc}
                     </div>
                 `;
             } else if (element.type === 'line') {
-                measurementText = `${element.measurements.length.toFixed(2)} م<br>(${element.measurements.lengthKm} كم)`;
+                measurementText = `
+                    <div style="font-size: 9px; color: #666;">
+                        <strong>الطول:</strong> ${element.measurements.length.toFixed(2)} م<br>
+                        <strong>الطول:</strong> ${element.measurements.lengthKm} كم
+                    </div>
+                `;
                 coordinateText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>بداية:</strong> ${element.coordinates.wgs84}
+                        <strong>بداية:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>المغرب:</strong> ${element.coordinates.maroc}
                     </div>
                 `;
             } else if (element.type === 'polygon') {
-                measurementText = `${element.measurements.area.toFixed(2)} م²<br>(${element.measurements.areaHectares} هكتار)`;
+                measurementText = `
+                    <div style="font-size: 9px; color: #666;">
+                        <strong>المساحة:</strong> ${element.measurements.area.toFixed(2)} م²<br>
+                        <strong>المساحة:</strong> ${element.measurements.areaHectares} هكتار<br>
+                        <strong>المحيط:</strong> ${element.measurements.perimeter.toFixed(2)} م<br>
+                        <strong>المحيط:</strong> ${element.measurements.perimeterKm} كم
+                    </div>
+                `;
                 coordinateText = `
                     <div style="font-size: 9px; color: #666;">
-                        <strong>المركز:</strong> ${element.coordinates.wgs84}
+                        <strong>المركز:</strong> ${element.coordinates.wgs84}<br>
+                        <strong>المغرب:</strong> ${element.coordinates.maroc}
                     </div>
                 `;
             }
@@ -1710,7 +1640,6 @@
                             </button>
                         </div>
                     </td>
-                    <td><small style="color: #666; font-size: 9px;">${element.source}</small></td>
                     <td>${element.createdAt}</td>
                 </tr>
             `;
@@ -1748,11 +1677,8 @@
         if (!isNaN(lat) && !isNaN(lng)) {
             try {
                 const coords = proj4('EPSG:4326', 'EPSG:26191', [lng, lat]);
-                // إزالة حقول Maroc إذا كانت موجودة
-                if ($('#coordXMaroc').length) {
-                    $('#coordXMaroc').val(coords[0].toFixed(2));
-                    $('#coordYMaroc').val(coords[1].toFixed(2));
-                }
+                $('#coordXMaroc').val(coords[0].toFixed(2));
+                $('#coordYMaroc').val(coords[1].toFixed(2));
             } catch (error) {
                 console.error('خطأ في التحويل:', error);
             }
@@ -1761,7 +1687,18 @@
     
     // تحديث WGS84 من Maroc
     function updateWGSFromMaroc() {
-        // تم إزالة هذا الجزء لتبسيط الواجهة
+        const x = parseFloat($('#coordXMaroc').val());
+        const y = parseFloat($('#coordYMaroc').val());
+        
+        if (!isNaN(x) && !isNaN(y)) {
+            try {
+                const coords = proj4('EPSG:26191', 'EPSG:4326', [x, y]);
+                $('#coordLatWGS').val(coords[1].toFixed(6));
+                $('#coordLonWGS').val(coords[0].toFixed(6));
+            } catch (error) {
+                console.error('خطأ في التحويل:', error);
+            }
+        }
     }
     
     // الانتقال إلى الإحداثيات
@@ -1775,44 +1712,6 @@
         } else {
             showNotification('الرجاء إدخال إحداثيات صحيحة', 'error');
         }
-    }
-    
-    // البحث عن موقع
-    function searchLocation() {
-        const input = $('#searchInput').val().trim();
-        
-        if (!input) {
-            showNotification('الرجاء إدخال إحداثيات أو اسم مكان', 'error');
-            return;
-        }
-        
-        // محاولة تحليل الإحداثيات
-        const coords = input.split(/[\s,;]+/);
-        if (coords.length >= 2) {
-            const lat = parseFloat(coords[0]);
-            const lng = parseFloat(coords[1]);
-            
-            if (!isNaN(lat) && !isNaN(lng)) {
-                map.setView([lat, lng], 15);
-                showNotification(`تم الانتقال إلى الإحداثيات: ${lat}, ${lng}`, 'success');
-                return;
-            }
-        }
-        
-        // البحث عن المدينة
-        const city = Object.keys(moroccanCities).find(c => 
-            c.includes(input) || input.includes(c)
-        );
-        
-        if (city) {
-            const location = moroccanCities[city];
-            map.setView([location.lat, location.lng], 12);
-            showNotification(`تم الانتقال إلى: ${city}`, 'success');
-        } else {
-            showNotification('لم يتم العثور على المكان المطلوب', 'error');
-        }
-        
-        $('#searchInput').val('');
     }
     
     // الحصول على موقعي
@@ -1926,20 +1825,22 @@
         );
     }
     
-    // عرض نتائج القياس
+    // عرض نتائج القياس كجدول
     function showMeasurementResults(layer, type) {
+        const tbody = $('#measurementTableBody');
+        tbody.empty();
+        
         if (type === 'line') {
             const length = calculateLength(layer);
             const lengthKm = (length / 1000).toFixed(3);
             
-            $('#measurementResults').show();
-            $('#measurementType').text('قياس طول الخط');
-            $('#measurementValue').text(`${length.toFixed(2)}`);
-            $('#measurementUnit').text('متر');
-            $('#detailValue1').text(lengthKm);
-            $('#detailLabel1').text('كيلومتر');
-            $('#detailValue2').text('');
-            $('#detailLabel2').text('');
+            tbody.append(`
+                <tr>
+                    <td>الطول</td>
+                    <td>${length.toFixed(2)} م</td>
+                    <td>${lengthKm} كم</td>
+                </tr>
+            `);
             
         } else if (type === 'polygon') {
             const area = calculateArea(layer);
@@ -1947,15 +1848,21 @@
             const perimeter = calculatePerimeter(layer);
             const perimeterKm = (perimeter / 1000).toFixed(3);
             
-            $('#measurementResults').show();
-            $('#measurementType').text('قياس مساحة المضلع');
-            $('#measurementValue').text(`${area.toFixed(2)}`);
-            $('#measurementUnit').text('متر مربع');
-            $('#detailValue1').text(areaHectares);
-            $('#detailLabel1').text('هكتار');
-            $('#detailValue2').text(perimeterKm);
-            $('#detailLabel2').text('كيلومتر (محيط)');
+            tbody.append(`
+                <tr>
+                    <td>المساحة</td>
+                    <td>${area.toFixed(2)} م²</td>
+                    <td>${areaHectares} هكتار</td>
+                </tr>
+                <tr>
+                    <td>المحيط</td>
+                    <td>${perimeter.toFixed(2)} م</td>
+                    <td>${perimeterKm} كم</td>
+                </tr>
+            `);
         }
+        
+        $('#measurementSection').show();
     }
     
     // مسح جميع العناصر
@@ -1967,23 +1874,12 @@
                 elementCounter = 1;
                 updateElementsTable();
                 updateDrawnCount();
-                $('#measurementResults').hide();
+                $('#measurementSection').hide();
                 showNotification('تم مسح جميع العناصر', 'info');
             }
         } else {
             showNotification('لا توجد عناصر للمسح', 'info');
         }
-    }
-    
-    // عرض جدول البيانات
-    function showTable() {
-        $('#tableSection').show();
-        updateElementsTable();
-    }
-    
-    // إخفاء جدول البيانات
-    function hideTable() {
-        $('#tableSection').hide();
     }
     
     // تنزيل جميع العناصر
@@ -1993,16 +1889,11 @@
             return;
         }
         
-        // إنشاء ملف WinRAR (ZIP) يحتوي على:
-        // 1. ملف CSV يحتوي على جدول البيانات
-        // 2. ملفات GeoJSON فردية لكل عنصر
-        // 3. ملف KML يحتوي على جميع العناصر
-        
         const zip = new JSZip();
         const timestamp = new Date().getTime();
         
         // 1. إنشاء ملف CSV
-        let csv = 'الاسم,النوع,الموقع,WGS84,المغرب (متر),المساحة/الطول,المصدر,التاريخ\n';
+        let csv = 'الاسم,النوع,الموقع,WGS84,المغرب (متر),المساحة/الطول,التاريخ\n';
         
         elements.forEach(element => {
             let measurement = '';
@@ -2015,7 +1906,7 @@
                 measurement = `${element.measurements.area.toFixed(2)} م² (${element.measurements.areaHectares} هكتار)`;
             }
             
-            csv += `"${element.name}","${getTypeName(element.type)}","${element.location}","${element.coordinates.wgs84}","${element.coordinates.maroc}","${measurement}","${element.source}","${element.createdAt}"\n`;
+            csv += `"${element.name}","${getTypeName(element.type)}","${element.location}","${element.coordinates.wgs84}","${element.coordinates.maroc}","${measurement}","${element.createdAt}"\n`;
         });
         
         zip.file(`جدول_العناصر_${timestamp}.csv`, '\uFEFF' + csv);
@@ -2031,7 +1922,6 @@
                 name: element.name,
                 type: element.type,
                 location: element.location,
-                source: element.source,
                 createdAt: element.createdAt,
                 coordinates: element.coordinates
             };
@@ -2060,7 +1950,6 @@
                 feature.properties.name = element.name;
                 feature.properties.type = element.type;
                 feature.properties.location = element.location;
-                feature.properties.source = element.source;
                 feature.properties.createdAt = element.createdAt;
                 
                 if (element.type === 'line') {
@@ -2077,30 +1966,6 @@
         
         const kml = toKML(geojson);
         zip.file(`جميع_العناصر_${timestamp}.kml`, kml);
-        
-        // 4. إنشاء ملف معلومات النظام
-        const systemInfo = {
-            تطبيق: "نظام القياس والمساحة الجغرافي",
-            تاريخ_التصدير: new Date().toLocaleString('ar'),
-            عدد_العناصر: elements.length,
-            حالة_النظام: $('#systemStatus').text(),
-            نظام_الإسقاط: currentProjection,
-            المصدر_الافتراضي: userEmail,
-            العناصر: elements.map(element => ({
-                الاسم: element.name,
-                النوع: getTypeName(element.type),
-                الموقع: element.location,
-                المصدر: element.source,
-                الإحداثيات_WGS84: element.coordinates.wgs84,
-                الإحداثيات_المغرب: element.coordinates.maroc,
-                المساحة_أو_الطول: element.type === 'point' ? 'نقطة' : 
-                                  element.type === 'line' ? `${element.measurements.length.toFixed(2)} م` : 
-                                  `${element.measurements.area.toFixed(2)} م²`,
-                التاريخ: element.createdAt
-            }))
-        };
-        
-        zip.file(`معلومات_النظام_${timestamp}.json`, JSON.stringify(systemInfo, null, 2));
         
         // إنشاء ملف ZIP وتنزيله
         zip.generateAsync({type: "blob"})
@@ -2125,7 +1990,6 @@
             const description = `
                 النوع: ${props.type || feature.geometry.type}
                 الموقع: ${props.location || 'غير محدد'}
-                المصدر: ${props.source || 'غير محدد'}
                 ${props.length ? `الطول: ${props.length}\n` : ''}
                 ${props.lengthKm ? `الطول: ${props.lengthKm}\n` : ''}
                 ${props.area ? `المساحة: ${props.area}\n` : ''}
@@ -2297,7 +2161,6 @@
                 name: element.name,
                 type: element.type,
                 location: element.location,
-                source: element.source,
                 createdAt: element.createdAt,
                 coordinates: element.coordinates
             };
@@ -2323,10 +2186,6 @@
     window.viewOnMap = function(elementId) {
         const element = elements.find(e => e.id === elementId);
         if (element) {
-            // إغلاق اللوحة الجانبية
-            $('#infoPanel').removeClass('show');
-            $('#mobileControlsBtn').html('<i class="fas fa-bars"></i> لوحة التحكم');
-            
             // التركيز على الخريطة
             if (element.type === 'point') {
                 const latlng = element.layer.getLatLng();
@@ -2342,8 +2201,9 @@
         }
     };
     
-    window.hideTable = hideTable;
     window.downloadAllElements = downloadAllElements;
     </script>
-</body>
+    
+
+    
 </html>
